@@ -1,6 +1,6 @@
 // ======================== КОНФИГУРАЦИЯ ========================
 // Выберите один из работающих API
-const API_URL = 'https://warply.vercel.app/generate';
+const API_URL = 'https://getwarp.netlify.app/generate';
 // Альтернативы:
 // const API_URL = 'https://getwarp.netlify.app/generate';
 // const API_URL = 'https://warply.vercel.app/generate';
