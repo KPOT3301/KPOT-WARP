@@ -1,9 +1,23 @@
-function generateConfig() {
-    const privateKey = generateKey(43); // base64 приватный ключ клиента
-    const serverPublicKey = "ТУТ_ВСТАВЬ_PUBLIC_KEY_СЕРВЕРА"; // PublicKey сервера
-    const endpoint = "SERVER_IP:51820"; // IP:порт сервера
+// Генерация случайного base64 ключа WireGuard
+function generateKey(length = 43) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    let key = '';
+    for (let i = 0; i < length; i++) {
+        key += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return key;
+}
 
-    // Случайный IP для клиента
+// Генерация конфигурации Amnezia WG
+function generateConfig() {
+    const privateKey = generateKey(); 
+
+    // === ВСТАВЬ СВОИ ДАННЫЕ ===
+    const serverPublicKey = "ВАШ_PUBLIC_KEY_СЕРВЕРА"; // PublicKey сервера Amnezia WG
+    const endpoint = "SERVER_IP:51820"; // IP:порт сервера
+    // ============================
+
+    // Случайный IP для клиента из диапазона 10.66.66.2-254
     const clientIP = `10.66.66.${Math.floor(Math.random() * 200 + 2)}/32`;
 
     const config = `
@@ -20,3 +34,21 @@ PersistentKeepalive = 25
     `;
     return config.trim();
 }
+
+// Генерация QR-кода
+function generateQRCode(text) {
+    const qrContainer = document.getElementById('qrcode');
+    qrContainer.innerHTML = '';
+    new QRCode(qrContainer, {
+        text: text,
+        width: 200,
+        height: 200
+    });
+}
+
+// Обработчик кнопки
+document.getElementById('generateBtn').addEventListener('click', () => {
+    const config = generateConfig();
+    document.getElementById('configOutput').value = config;
+    generateQRCode(config);
+});
