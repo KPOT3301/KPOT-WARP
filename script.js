@@ -1,21 +1,16 @@
 // ======================== КОНФИГУРАЦИЯ ========================
-// Список проверенных публичных API (работают на момент написания)
-const API_LIST = [
-  'https://getwarp.netlify.app/generate',
-  'https://warply.vercel.app/generate',
-  'https://topor-warp.vercel.app/generate'
-];
-// Публичный CORS-прокси (не требует регистрации)
+// Адрес вашего API (если путь другой – измените)
+const API_BASE = 'http://46.243.232.127:5000';
+const API_ENDPOINT = '/generate';   // предположительно
+
+// Публичный CORS-прокси (работает без регистрации)
 const PROXY = 'https://corsproxy.io/?';
+const USE_PROXY = true;   // если API не отдаёт CORS-заголовки, оставьте true
 
-// Выберите API из списка (просто замените индекс 0 на 1 или 2)
-let selectedAPI = API_LIST[0]; // попробуйте getwarp
-
-// Если выбранный API не поддерживает CORS, используйте прокси (поставьте true)
-const USE_PROXY = true;   // попробуйте сначала true, если не работает – false
-
-// Итоговый URL для запроса
-const API_URL = USE_PROXY ? PROXY + encodeURIComponent(selectedAPI) : selectedAPI;
+// Итоговый URL
+const API_URL = USE_PROXY 
+    ? PROXY + encodeURIComponent(API_BASE + API_ENDPOINT)
+    : API_BASE + API_ENDPOINT;
 
 // ======================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ========================
 let currentConfig = null;
@@ -58,6 +53,11 @@ async function fetchConfig(type) {
             throw new Error('Пустой ответ от сервера');
         }
 
+        // Проверяем, содержит ли конфиг нужные поля для AmneziaWG
+        if (type === 'amneziawg' && !configText.includes('Jc')) {
+            console.warn('Полученный конфиг может не содержать обфускационных параметров AmneziaWG');
+        }
+
         currentConfig = configText;
         currentType = type;
         configPreview.textContent = configText;
@@ -65,7 +65,7 @@ async function fetchConfig(type) {
 
     } catch (error) {
         console.error('Ошибка генерации:', error);
-        configPreview.textContent = `❌ Ошибка: ${error.message}\n\nПопробуйте сменить API (измените индекс в API_LIST) или выключить прокси (USE_PROXY = false).`;
+        configPreview.textContent = `❌ Ошибка: ${error.message}\n\nПроверьте доступность API (${API_BASE}). Если API не отвечает, попробуйте сменить адрес в настройках.`;
         downloadBtn.disabled = true;
         currentConfig = null;
     }
