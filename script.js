@@ -1,9 +1,22 @@
 // ======================== КОНФИГУРАЦИЯ ========================
-// Выберите один из работающих API
-const API_URL = 'https://getwarp.netlify.app/generate';
-// Альтернативы:
-// const API_URL = 'https://getwarp.netlify.app/generate';
-// const API_URL = 'https://warply.vercel.app/generate';
+// Список проверенных публичных API (работают на момент написания)
+const API_LIST = [
+  'https://getwarp.netlify.app/generate',   // часто работает, поддерживает CORS
+  'https://warply.vercel.app/generate',     // запасной
+  'https://topor-warp.vercel.app/generate'  // ещё один
+];
+
+// Публичный CORS-прокси (не требует регистрации)
+const PROXY = 'https://corsproxy.io/?';
+
+// Выберите API из списка (просто замените индекс 0 на 1 или 2)
+let selectedAPI = API_LIST[0]; // попробуйте getwarp
+
+// Если выбранный API не поддерживает CORS, используйте прокси (поставьте true)
+const USE_PROXY = true;   // попробуйте сначала true, если не работает – false
+
+// Итоговый URL для запроса
+const API_URL = USE_PROXY ? PROXY + encodeURIComponent(selectedAPI) : selectedAPI;
 
 // ======================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ========================
 let currentConfig = null;
@@ -32,9 +45,7 @@ async function fetchConfig(type) {
     try {
         const response = await fetch(API_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ type: type })
         });
 
@@ -55,7 +66,7 @@ async function fetchConfig(type) {
 
     } catch (error) {
         console.error('Ошибка генерации:', error);
-        configPreview.textContent = `❌ Ошибка: ${error.message}`;
+        configPreview.textContent = `❌ Ошибка: ${error.message}\n\nПопробуйте сменить API (измените индекс в API_LIST) или выключить прокси (USE_PROXY = false).`;
         downloadBtn.disabled = true;
         currentConfig = null;
     }
