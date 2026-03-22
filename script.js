@@ -1,7 +1,9 @@
 // ======================== КОНФИГУРАЦИЯ ========================
-// Используем общедоступный CORS-прокси (не требует активации)
-const PROXY = 'https://corsproxy.io/?';
-const API_URL = PROXY + encodeURIComponent('https://warp.llimonix.dev/generate');
+// Выберите один из работающих API
+const API_URL = 'https://topor-warp.vercel.app/generate';
+// Альтернативы:
+// const API_URL = 'https://getwarp.netlify.app/generate';
+// const API_URL = 'https://warply.vercel.app/generate';
 
 // ======================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ========================
 let currentConfig = null;
@@ -17,7 +19,6 @@ function isTelegramWebView() {
     const ua = navigator.userAgent.toLowerCase();
     return ua.includes('telegram') || ua.includes('tw看');
 }
-
 if (isTelegramWebView()) {
     telegramWarning.style.display = 'block';
 }
