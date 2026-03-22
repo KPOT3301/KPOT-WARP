@@ -26,7 +26,6 @@ body {
     margin-bottom: 2rem;
     max-width: 600px;
     font-weight: 500;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .container {
@@ -81,10 +80,6 @@ h1 {
     transform: translateY(-2px);
 }
 
-.config-btn:active {
-    transform: translateY(1px);
-}
-
 .preview-area {
     background: #0b0d11;
     border-radius: 20px;
@@ -116,7 +111,6 @@ pre {
     width: 100%;
     cursor: pointer;
     transition: background 0.2s;
-    box-shadow: 0 4px 12px rgba(95,126,255,0.3);
 }
 
 .download-btn:hover:not(:disabled) {
@@ -134,26 +128,4 @@ footer {
     font-size: 0.8rem;
     color: #6b7280;
     text-align: center;
-}
-
-footer a {
-    color: #8b9eff;
-    text-decoration: none;
-}
-
-footer a:hover {
-    text-decoration: underline;
-}
-
-@media (max-width: 600px) {
-    .container {
-        padding: 1.5rem;
-    }
-    h1 {
-        font-size: 1.8rem;
-    }
-    .config-btn {
-        padding: 0.6rem 1.2rem;
-        font-size: 0.9rem;
-    }
 }
