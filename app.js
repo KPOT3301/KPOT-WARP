@@ -12,10 +12,9 @@ function generateKey(length = 43) {
 function generateConfig() {
     const privateKey = generateKey(); 
 
-    // === ВСТАВЬ СВОИ ДАННЫЕ ===
-    const serverPublicKey = "ВАШ_PUBLIC_KEY_СЕРВЕРА"; // PublicKey сервера Amnezia WG
-    const endpoint = "SERVER_IP:51820"; // IP:порт сервера
-    // ============================
+    // Данные сервера из твоего .conf файла
+    const serverPublicKey = "R/TI2Xm21f8NzO+2ag6PiMTTdpBmDBx5QxQtGQgYghU=";
+    const endpoint = "46.243.232.127:51820";
 
     // Случайный IP для клиента из диапазона 10.66.66.2-254
     const clientIP = `10.66.66.${Math.floor(Math.random() * 200 + 2)}/32`;
