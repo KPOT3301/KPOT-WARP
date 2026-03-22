@@ -1,7 +1,7 @@
 // ======================== КОНФИГУРАЦИЯ ========================
-// Прокси для обхода CORS (требует предварительной активации по ссылке выше)
-const PROXY = 'https://cors-anywhere.herokuapp.com/';
-const API_URL = PROXY + 'https://warp.llimonix.dev/generate';
+// Используем общедоступный CORS-прокси (не требует активации)
+const PROXY = 'https://corsproxy.io/?';
+const API_URL = PROXY + encodeURIComponent('https://warp.llimonix.dev/generate');
 
 // ======================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ========================
 let currentConfig = null;
@@ -54,7 +54,7 @@ async function fetchConfig(type) {
 
     } catch (error) {
         console.error('Ошибка генерации:', error);
-        configPreview.textContent = `❌ Ошибка: ${error.message}\n\nЕсли ошибка CORS, проверьте, активирован ли прокси (перейдите по ссылке выше).`;
+        configPreview.textContent = `❌ Ошибка: ${error.message}`;
         downloadBtn.disabled = true;
         currentConfig = null;
     }
