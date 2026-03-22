@@ -1,11 +1,10 @@
 // ======================== КОНФИГУРАЦИЯ ========================
 // Список проверенных публичных API (работают на момент написания)
 const API_LIST = [
-  'https://getwarp.netlify.app/generate',   // часто работает, поддерживает CORS
-  'https://warply.vercel.app/generate',     // запасной
-  'https://topor-warp.vercel.app/generate'  // ещё один
+  'https://getwarp.netlify.app/generate',
+  'https://warply.vercel.app/generate',
+  'https://topor-warp.vercel.app/generate'
 ];
-
 // Публичный CORS-прокси (не требует регистрации)
 const PROXY = 'https://corsproxy.io/?';
 
