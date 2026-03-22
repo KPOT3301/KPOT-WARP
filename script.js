@@ -1,16 +1,12 @@
 // ======================== КОНФИГУРАЦИЯ ========================
-// Оригинальный API (проверено: POST /generate с JSON {"type": "..."})
-const API_URL = 'https://warp.llimonix.dev/generate';
-
-// Если API возвращает ошибку CORS, используйте публичный прокси:
-// const PROXY = 'https://cors-anywhere.herokuapp.com/';
-// const API_URL = PROXY + 'https://warp.llimonix.dev/generate';
+// Прокси для обхода CORS (требует предварительной активации по ссылке выше)
+const PROXY = 'https://cors-anywhere.herokuapp.com/';
+const API_URL = PROXY + 'https://warp.llimonix.dev/generate';
 
 // ======================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ========================
 let currentConfig = null;
 let currentType = null;
 
-// Элементы DOM
 const telegramWarning = document.getElementById('telegramWarning');
 const configPreview = document.getElementById('configPreview');
 const downloadBtn = document.getElementById('downloadBtn');
@@ -26,9 +22,8 @@ if (isTelegramWebView()) {
     telegramWarning.style.display = 'block';
 }
 
-// ======================== ФУНКЦИЯ ЗАПРОСА К API ========================
+// ======================== ЗАПРОС К API ========================
 async function fetchConfig(type) {
-    // Показываем загрузку
     configPreview.textContent = '⏳ Генерация конфигурации...';
     downloadBtn.disabled = true;
     currentConfig = null;
@@ -46,7 +41,6 @@ async function fetchConfig(type) {
             throw new Error(`HTTP ${response.status} ${response.statusText}`);
         }
 
-        // Ответ приходит в виде текста конфигурации
         const configText = await response.text();
 
         if (!configText || configText.trim() === '') {
@@ -60,13 +54,12 @@ async function fetchConfig(type) {
 
     } catch (error) {
         console.error('Ошибка генерации:', error);
-        configPreview.textContent = `❌ Ошибка при получении конфигурации.\nДетали: ${error.message}\n\nЕсли ошибка связана с CORS, попробуйте раскомментировать строку с прокси в script.js.`;
+        configPreview.textContent = `❌ Ошибка: ${error.message}\n\nЕсли ошибка CORS, проверьте, активирован ли прокси (перейдите по ссылке выше).`;
         downloadBtn.disabled = true;
         currentConfig = null;
     }
 }
 
-// ======================== ОБРАБОТЧИКИ КНОПОК ========================
 configBtns.forEach(btn => {
     btn.addEventListener('click', () => {
         const type = btn.getAttribute('data-type');
@@ -74,15 +67,11 @@ configBtns.forEach(btn => {
     });
 });
 
-// ======================== СКАЧИВАНИЕ ФАЙЛА ========================
 downloadBtn.addEventListener('click', () => {
     if (!currentConfig) return;
 
-    // Определяем расширение файла в зависимости от типа
     let extension = '.conf';
     if (currentType === 'clash') extension = '.yaml';
-    if (currentType === 'amneziawg') extension = '.conf';
-    if (currentType === 'wiresock') extension = '.conf';
 
     const blob = new Blob([currentConfig], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
