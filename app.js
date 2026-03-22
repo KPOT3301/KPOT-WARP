@@ -1,4 +1,3 @@
-// Генерация случайного base64 ключа WireGuard
 function generateKey(length = 43) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
     let key = '';
@@ -8,46 +7,34 @@ function generateKey(length = 43) {
     return key;
 }
 
-// Генерация конфигурации Amnezia WG
 function generateConfig() {
-    const privateKey = generateKey(); 
-
-    // Данные сервера из твоего .conf файла
+    const privateKey = generateKey();
     const serverPublicKey = "R/TI2Xm21f8NzO+2ag6PiMTTdpBmDBx5QxQtGQgYghU=";
     const endpoint = "46.243.232.127:51820";
+    const ipBase = document.getElementById("ipRange").value || "10.66.66";
+    const clientIP = `${ipBase}.${Math.floor(Math.random()*200 + 2)}/32`;
+    const dns = document.getElementById("dns").value || "1.1.1.1";
 
-    // Случайный IP для клиента из диапазона 10.66.66.2-254
-    const clientIP = `10.66.66.${Math.floor(Math.random() * 200 + 2)}/32`;
-
-    const config = `
-[Interface]
+    return `[Interface]
 PrivateKey = ${privateKey}
 Address = ${clientIP}
-DNS = 1.1.1.1
+DNS = ${dns}
 
 [Peer]
 PublicKey = ${serverPublicKey}
 AllowedIPs = 0.0.0.0/0, ::/0
 Endpoint = ${endpoint}
-PersistentKeepalive = 25
-    `;
-    return config.trim();
+PersistentKeepalive = 25`;
 }
 
-// Генерация QR-кода
 function generateQRCode(text) {
-    const qrContainer = document.getElementById('qrcode');
-    qrContainer.innerHTML = '';
-    new QRCode(qrContainer, {
-        text: text,
-        width: 200,
-        height: 200
-    });
+    const qrContainer = document.getElementById("qrcode");
+    qrContainer.innerHTML = "";
+    new QRCode(qrContainer, { text, width: 200, height: 200 });
 }
 
-// Обработчик кнопки
-document.getElementById('generateBtn').addEventListener('click', () => {
+document.getElementById("generateBtn").addEventListener("click", () => {
     const config = generateConfig();
-    document.getElementById('configOutput').value = config;
+    document.getElementById("configOutput").value = config;
     generateQRCode(config);
 });
