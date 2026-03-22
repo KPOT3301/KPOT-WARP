@@ -1,478 +1,151 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Warp / AmneziaWG Generator (SIP obfuscation)</title>
-    <style>
-        /* ... стили как в предыдущей версии, немного расширены ... */
-        * {
-            box-sizing: border-box;
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-        }
-        body {
-            background: #0b1120;
-            color: #e2e8f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-        .card {
-            max-width: 820px;
-            width: 100%;
-            background: #1e293b;
-            border-radius: 28px;
-            padding: 24px 28px;
-            box-shadow: 0 25px 40px -12px rgba(0,0,0,0.5);
-            border: 1px solid #334155;
-        }
-        h1 {
-            font-size: 1.8rem;
-            font-weight: 600;
-            margin-top: 0;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, #c084fc, #60a5fa);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-        }
-        .sub {
-            color: #94a3b8;
-            margin-bottom: 28px;
-            border-left: 3px solid #3b82f6;
-            padding-left: 12px;
-            font-size: 0.9rem;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: #cbd5e1;
-            font-size: 0.9rem;
-        }
-        input, select, textarea {
-            width: 100%;
-            background: #0f172a;
-            border: 1px solid #334155;
-            border-radius: 16px;
-            padding: 12px 16px;
-            color: #f1f5f9;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-            font-family: monospace;
-        }
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #60a5fa;
-            box-shadow: 0 0 0 2px rgba(96,165,250,0.3);
-        }
-        textarea {
-            resize: vertical;
-            font-size: 0.75rem;
-        }
-        .key-row {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-        .key-row input {
-            flex: 1;
-        }
-        button {
-            background: #3b82f6;
-            border: none;
-            border-radius: 40px;
-            padding: 10px 18px;
-            font-weight: 600;
-            color: white;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.05s;
-            font-size: 0.9rem;
-        }
-        button.secondary {
-            background: #334155;
-        }
-        button.secondary:hover {
-            background: #475569;
-        }
-        button:hover {
-            background: #2563eb;
-        }
-        .gen-btn {
-            margin-top: 8px;
-            width: 100%;
-            padding: 14px;
-            font-size: 1rem;
-            background: #10b981;
-        }
-        .gen-btn:hover {
-            background: #059669;
-        }
-        .output {
-            margin-top: 28px;
-            border-top: 1px solid #334155;
-            padding-top: 20px;
-        }
-        .config-box {
-            background: #0f172a;
-            border-radius: 20px;
-            padding: 16px;
-            font-family: monospace;
-            font-size: 0.7rem;
-            white-space: pre-wrap;
-            word-break: break-all;
-            max-height: 380px;
-            overflow: auto;
-            border: 1px solid #2d3a5e;
-        }
-        .flex-btns {
-            display: flex;
-            gap: 12px;
-            margin-top: 16px;
-            flex-wrap: wrap;
-        }
-        .info {
-            background: #0f172a80;
-            border-radius: 16px;
-            padding: 12px;
-            font-size: 0.8rem;
-            color: #9ca3af;
-            margin-top: 16px;
-        }
-        .badge {
-            background: #2d3748;
-            border-radius: 40px;
-            padding: 4px 12px;
-            font-size: 0.7rem;
-            font-weight: 500;
-            display: inline-block;
-        }
-        .mode-switch {
-            display: flex;
-            gap: 12px;
-            background: #0f172a;
-            border-radius: 40px;
-            padding: 4px;
-            margin-bottom: 20px;
-        }
-        .mode-btn {
-            flex: 1;
-            text-align: center;
-            background: transparent;
-            border-radius: 36px;
-            padding: 8px 0;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .mode-btn.active {
-            background: #3b82f6;
-            color: white;
-        }
-        .obf-params {
-            display: none;
-            background: #0f172a;
-            border-radius: 20px;
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-        .param-row {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
-        .param-row .param {
-            flex: 1;
-            min-width: 100px;
-        }
-        .param-row label {
-            font-size: 0.75rem;
-            margin-bottom: 4px;
-        }
-        .sip-params {
-            display: none;
-        }
-        hr {
-            border-color: #334155;
-            margin: 16px 0;
-        }
-        @media (max-width: 550px) {
-            .card {
-                padding: 18px;
-            }
-            .key-row {
-                flex-wrap: wrap;
-            }
-        }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AmneziaWG</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f17;
+      color: #e0e0ff;
+      margin: 0;
+      padding: 20px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      color: #a5b4fc;
+      margin: 0.4em 0;
+      font-size: 2.6rem;
+    }
+    .section {
+      background: #1e1e38;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      border: 1px solid #4f46e5;
+    }
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      text-align: center;
+      margin: 32px 0;
+    }
+    .stat-item {
+      flex: 1;
+    }
+    .emoji {
+      font-size: 2.4rem;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .number {
+      font-size: 2.1rem;
+      font-weight: bold;
+      color: #c7d2fe;
+    }
+    .label {
+      color: #a1a1ff;
+      font-size: 1.1rem;
+    }
+    .warning {
+      background: #451a1a;
+      border: 2px solid #dc2626;
+      border-radius: 10px;
+      padding: 16px;
+      margin: 28px 0;
+      color: #fecaca;
+    }
+    .warning strong {
+      color: #fca5a5;
+    }
+    .download {
+      display: block;
+      width: 100%;
+      max-width: 340px;
+      margin: 32px auto;
+      padding: 18px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      text-align: center;
+      text-decoration: none;
+      color: white;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+      transition: all 0.2s;
+    }
+    .download:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.6);
+    }
+    .pubkey {
+      margin-top: 40px;
+      padding: 16px;
+      background: #1e1e2e;
+      border-radius: 10px;
+      font-family: monospace;
+      font-size: 1.05rem;
+      word-break: break-all;
+      color: #c4b5fd;
+      border-left: 4px solid #7c3aed;
+    }
+    .small {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      text-align: center;
+      margin-top: 60px;
+    }
+  </style>
 </head>
 <body>
-<div class="card">
-    <h1>⚡ Warp / AmneziaWG Generator</h1>
-    <div class="sub">Локальная генерация ключей · Поддержка SIP-обфускации (I1/I2)</div>
 
-    <div class="mode-switch" id="modeSwitch">
-        <button class="mode-btn active" data-mode="wireguard">WireGuard</button>
-        <button class="mode-btn" data-mode="amnezia">AmneziaWG (Jc/Jmin..)</button>
-        <button class="mode-btn" data-mode="sip">SIP-обфускация (I1/I2)</button>
-    </div>
+<div class="container">
 
-    <!-- Общие поля -->
-    <div class="form-group">
-        <label>🔑 Публичный ключ сервера (Peer)</label>
-        <input type="text" id="serverPub" placeholder="Публичный ключ сервера WARP / WireGuard" value="bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=">
-        <div class="info">☁️ Стандартный ключ WARP – можно оставить, если используете WARP. Для кастомных серверов вставьте свой.</div>
-    </div>
+  <h1>AmneziaWG</h1>
+  <h1>AmneziaWG</h1>
 
-    <div class="form-group">
-        <label>🌍 Endpoint сервера (IP:PORT или домен:порт)</label>
-        <input type="text" id="endpoint" placeholder="например: engage.cloudflareclient.com:2408" value="de.tribukvy.ltd:7152">
-        <div class="info">Для SIP-обфускации часто используют кастомные домены и порты (как в вашем примере).</div>
-    </div>
+  <div class="section">
+    <strong>Профиль против белых списков</strong>
+  </div>
 
-    <div class="form-group">
-        <label>📡 DNS серверы (через запятую)</label>
-        <input type="text" id="dns" value="1.1.1.1, 1.0.0.1, 2606:4700:4700::1111, 2606:4700:4700::1001">
+  <div class="stats">
+    <div class="stat-item">
+      <span class="emoji">👤</span>
+      <div class="number">4705</div>
+      <div class="label">Выдано ключей</div>
     </div>
+    <div class="stat-item">
+      <span class="emoji">🌐</span>
+      <div class="number">6.31 TB</div>
+      <div class="label">Общий трафик</div>
+    </div>
+  </div>
 
-    <div class="form-group">
-        <label>🌐 IP-адреса клиента (Interface Address)</label>
-        <input type="text" id="clientIp" placeholder="IPv4/32, IPv6/128" value="172.16.0.2, 2606:4700:110:8c58:7ac4:9b41:4ba:51b4">
-        <div class="info">Можно указать IPv4 и IPv6 через запятую, например <code>172.16.0.2/32, fd01::2/128</code>. В примере выше адреса без масок — допустимо.</div>
-    </div>
+  <div class="warning">
+    <strong>⚠️ Внимание: Откройте в браузере</strong><br><br>
+    Если вы открыли эту ссылку внутри <strong>Telegram</strong> или Instagram, скачивание файла не сработает!<br>
+    Нажмите на три точки в углу экрана и выберите «Открыть в Chrome / Safari / браузере».
+  </div>
 
-    <div class="form-group">
-        <label>🚀 AllowedIPs (разрешённые маршруты)</label>
-        <input type="text" id="allowedIps" value="0.0.0.0/0, ::/0">
-    </div>
+  <a href="amneziawg-profile.conf" class="download" download>
+    Скачать профиль
+  </a>
 
-    <!-- Блок Amnezia (Jc, Jmin, Jmax, S1, S2, H1-H4) -->
-    <div id="amneziaParams" class="obf-params">
-        <div class="param-row">
-            <div class="param"><label>MTU</label><input type="number" id="mtu" value="1280"></div>
-            <div class="param"><label>Jc</label><input type="number" id="jc" value="4"></div>
-            <div class="param"><label>Jmin</label><input type="number" id="jmin" value="40"></div>
-            <div class="param"><label>Jmax</label><input type="number" id="jmax" value="70"></div>
-        </div>
-        <div class="param-row">
-            <div class="param"><label>S1</label><input type="number" id="s1" value="0"></div>
-            <div class="param"><label>S2</label><input type="number" id="s2" value="0"></div>
-            <div class="param"><label>H1</label><input type="number" id="h1" value="1"></div>
-            <div class="param"><label>H2</label><input type="number" id="h2" value="2"></div>
-            <div class="param"><label>H3</label><input type="number" id="h3" value="3"></div>
-            <div class="param"><label>H4</label><input type="number" id="h4" value="4"></div>
-        </div>
-    </div>
+  <div class="pubkey">
+    Server PubKey: R/TI2Xm21f8NzO+...
+  </div>
 
-    <!-- Блок SIP-обфускации (I1, I2) -->
-    <div id="sipParams" class="obf-params">
-        <div class="form-group">
-            <label>📨 I1 (первая часть SIP-обфускации)</label>
-            <textarea id="i1" rows="4" placeholder="Введите I1 как в примере">&lt;b 0x494e56495445207369703a626f624062696c6f78692e636f6d205349502f322e300d0a5669613a205349502f322e302f55445020706333332e61746c616e74612e636f6d3b6272616e63683d7a39684734624b3737366173646864730d0a4d61782d466f7277617264733a2037300d0a546f3a20426f62203c7369703a626f624062696c6f78692e636f6d3e0d0a46726f6d3a20416c696365203c7369703a616c6963654061746c616e74612e636f6d3e3b7461673d313932383330313737340d0a43616c6c2d49443a20613834623463373665363637313040706333332e61746c616e74612e636f6d0d0a435365713a2033313431353920494e564954450d0a436f6e746163743a203c7369703a616c69636540706333332e61746c616e74612e636f6d3e0d0a436f6e74656e742d547970653a206170706c69636174696f6e2f7364700d0a436f6e74656e742d4c656e6774683a20300d0a0d0a&gt;</textarea>
-        </div>
-        <div class="form-group">
-            <label>📨 I2 (вторая часть SIP-обфускации)</label>
-            <textarea id="i2" rows="4" placeholder="Введите I2 как в примере">&lt;b 0x5349502f322e302031303020547279696e670d0a5669613a205349502f322e302f55445020706333332e61746c616e74612e636f6d3b6272616e63683d7a39684734624b3737366173646864730d0a546f3a20426f62203c7369703a626f624062696c6f78692e636f6d3e0d0a46726f6d3a20416c696365203c7369703a616c6963654061746c616e74612e636f6d3e3b7461673d313932383330313737340d0a43616c6c2d49443a20613834623463373665363637313040706333332e61746c616e74612e636f6d0d0a435365713a2033313431353920494e564954450d0a436f6e74656e742d4c656e6774683a20300d0a0d0a&gt;</textarea>
-        </div>
-    </div>
+  <div class="small">
+    (это пример страницы • замени числа / pubkey / файл при необходимости)
+  </div>
 
-    <div class="form-group">
-        <label>🔐 Ваши ключи WireGuard (генерируются автоматически)</label>
-        <div class="key-row">
-            <input type="text" id="privKey" placeholder="Приватный ключ" readonly>
-            <button class="secondary" id="regenerateKeys">⟳ Перегенерировать</button>
-        </div>
-        <div class="key-row" style="margin-top: 8px;">
-            <input type="text" id="pubKey" placeholder="Публичный ключ" readonly>
-        </div>
-    </div>
-
-    <button id="generateConfigBtn" class="gen-btn">✨ Собрать и показать конфигурацию</button>
-
-    <div class="output" id="outputArea" style="display: none;">
-        <label>📄 Конфигурация (файл .conf)</label>
-        <div class="config-box" id="configText"></div>
-        <div class="flex-btns">
-            <button id="downloadBtn">⬇ Скачать .conf</button>
-            <button id="copyBtn">📋 Скопировать</button>
-        </div>
-    </div>
-    <div class="info" style="margin-top: 24px;">
-        🔒 Все ключи генерируются в браузере и не покидают устройство.<br>
-        📌 Режим <strong>SIP-обфускации</strong> использует параметры I1 и I2 для маскировки трафика под SIP. Скопируйте значения из примера или вставьте свои.<br>
-        ⚠️ Для работы с такими конфигами используйте клиент, поддерживающий AmneziaWG (или форк с I1/I2).
-    </div>
 </div>
 
-<script>
-    // Генерация ключей
-    function generateWireGuardKeys() {
-        const keyPair = nacl.box.keyPair();
-        const privBase64 = btoa(String.fromCharCode.apply(null, keyPair.secretKey));
-        const pubBase64 = btoa(String.fromCharCode.apply(null, keyPair.publicKey));
-        return { priv: privBase64, pub: pubBase64 };
-    }
-
-    function setKeysToInputs() {
-        const keys = generateWireGuardKeys();
-        document.getElementById('privKey').value = keys.priv;
-        document.getElementById('pubKey').value = keys.pub;
-        return keys;
-    }
-
-    let currentKeys = setKeysToInputs();
-
-    document.getElementById('regenerateKeys').addEventListener('click', () => {
-        currentKeys = setKeysToInputs();
-        document.getElementById('outputArea').style.display = 'none';
-    });
-
-    let currentMode = 'wireguard';
-    const modeSwitch = document.getElementById('modeSwitch');
-    const amneziaDiv = document.getElementById('amneziaParams');
-    const sipDiv = document.getElementById('sipParams');
-
-    function setMode(mode) {
-        currentMode = mode;
-        document.querySelectorAll('.mode-btn').forEach(btn => {
-            if (btn.dataset.mode === mode) btn.classList.add('active');
-            else btn.classList.remove('active');
-        });
-        amneziaDiv.style.display = (mode === 'amnezia') ? 'block' : 'none';
-        sipDiv.style.display = (mode === 'sip') ? 'block' : 'none';
-        document.getElementById('outputArea').style.display = 'none';
-    }
-
-    document.querySelectorAll('.mode-btn').forEach(btn => {
-        btn.addEventListener('click', () => setMode(btn.dataset.mode));
-    });
-
-    function buildConfig() {
-        const serverPub = document.getElementById('serverPub').value.trim();
-        const endpoint = document.getElementById('endpoint').value.trim();
-        const dnsRaw = document.getElementById('dns').value.trim();
-        let dns = dnsRaw;
-        if (dnsRaw.includes(',')) dns = dnsRaw.split(',').map(s => s.trim()).join(', ');
-        const clientIpRaw = document.getElementById('clientIp').value.trim();
-        let addresses = clientIpRaw;
-        if (clientIpRaw.includes(',')) addresses = clientIpRaw.split(',').map(s => s.trim()).join(', ');
-        const allowedIpsRaw = document.getElementById('allowedIps').value.trim();
-        let allowedIPs = allowedIpsRaw;
-        if (allowedIpsRaw.includes(',')) allowedIPs = allowedIpsRaw.split(',').map(s => s.trim()).join(', ');
-        const privKey = document.getElementById('privKey').value;
-
-        if (!privKey) { alert('Сначала сгенерируйте ключи'); return null; }
-        if (!serverPub || !endpoint) { alert('Заполните публичный ключ сервера и endpoint'); return null; }
-
-        let config = `[Interface]\n`;
-        config += `PrivateKey = ${privKey}\n`;
-        config += `Address = ${addresses}\n`;
-        config += `DNS = ${dns}\n`;
-
-        // Общие параметры для всех режимов кроме wireguard? (MTU)
-        if (currentMode === 'amnezia' || currentMode === 'sip') {
-            const mtu = document.getElementById('mtu').value;
-            if (mtu) config += `MTU = ${mtu}\n`;
-        }
-
-        if (currentMode === 'amnezia') {
-            const jc = document.getElementById('jc').value;
-            const jmin = document.getElementById('jmin').value;
-            const jmax = document.getElementById('jmax').value;
-            const s1 = document.getElementById('s1').value;
-            const s2 = document.getElementById('s2').value;
-            const h1 = document.getElementById('h1').value;
-            const h2 = document.getElementById('h2').value;
-            const h3 = document.getElementById('h3').value;
-            const h4 = document.getElementById('h4').value;
-            if (jc) config += `Jc = ${jc}\n`;
-            if (jmin) config += `Jmin = ${jmin}\n`;
-            if (jmax) config += `Jmax = ${jmax}\n`;
-            if (s1) config += `S1 = ${s1}\n`;
-            if (s2) config += `S2 = ${s2}\n`;
-            if (h1) config += `H1 = ${h1}\n`;
-            if (h2) config += `H2 = ${h2}\n`;
-            if (h3) config += `H3 = ${h3}\n`;
-            if (h4) config += `H4 = ${h4}\n`;
-        }
-
-        if (currentMode === 'sip') {
-            const i1 = document.getElementById('i1').value.trim();
-            const i2 = document.getElementById('i2').value.trim();
-            if (i1) config += `I1 = ${i1}\n`;
-            if (i2) config += `I2 = ${i2}\n`;
-            // Также добавим Jc/Jmin/Jmax/S1/S2/H1-H4, если они есть (можно оставить настраиваемыми, но в примере они есть)
-            const jc = document.getElementById('jc').value;
-            const jmin = document.getElementById('jmin').value;
-            const jmax = document.getElementById('jmax').value;
-            const s1 = document.getElementById('s1').value;
-            const s2 = document.getElementById('s2').value;
-            const h1 = document.getElementById('h1').value;
-            const h2 = document.getElementById('h2').value;
-            const h3 = document.getElementById('h3').value;
-            const h4 = document.getElementById('h4').value;
-            if (jc) config += `Jc = ${jc}\n`;
-            if (jmin) config += `Jmin = ${jmin}\n`;
-            if (jmax) config += `Jmax = ${jmax}\n`;
-            if (s1) config += `S1 = ${s1}\n`;
-            if (s2) config += `S2 = ${s2}\n`;
-            if (h1) config += `H1 = ${h1}\n`;
-            if (h2) config += `H2 = ${h2}\n`;
-            if (h3) config += `H3 = ${h3}\n`;
-            if (h4) config += `H4 = ${h4}\n`;
-        }
-
-        config += `\n[Peer]\n`;
-        config += `PublicKey = ${serverPub}\n`;
-        config += `Endpoint = ${endpoint}\n`;
-        config += `AllowedIPs = ${allowedIPs}\n`;
-        config += `PersistentKeepalive = 25\n`;
-        return config;
-    }
-
-    const outputDiv = document.getElementById('outputArea');
-    const configTextPre = document.getElementById('configText');
-    let currentConfig = '';
-
-    function updateOutput() {
-        const conf = buildConfig();
-        if (!conf) return;
-        currentConfig = conf;
-        configTextPre.innerText = conf;
-        outputDiv.style.display = 'block';
-    }
-
-    document.getElementById('generateConfigBtn').addEventListener('click', updateOutput);
-
-    document.getElementById('downloadBtn').addEventListener('click', () => {
-        if (!currentConfig) { alert('Сначала сгенерируйте конфигурацию'); return; }
-        const blob = new Blob([currentConfig], { type: 'application/wireguard-config' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.href = url;
-        link.download = 'warp.conf';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    });
-
-    document.getElementById('copyBtn').addEventListener('click', async () => {
-        if (!currentConfig) { alert('Сначала сгенерируйте конфигурацию'); return; }
-        try {
-            await navigator.clipboard.writeText(currentConfig);
-            alert('✅ Конфигурация скопирована');
-        } catch (err) {
-            alert('Не удалось скопировать');
-        }
-    });
-</script>
 </body>
 </html>
