@@ -3,36 +3,342 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>WARP Генератор для AmneziaWG 1.5</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Warp Config Generator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+        body {
+            background: #0b1120;
+            color: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .card {
+            max-width: 650px;
+            width: 100%;
+            background: #1e293b;
+            border-radius: 28px;
+            padding: 24px 28px;
+            box-shadow: 0 25px 40px -12px rgba(0,0,0,0.5);
+            border: 1px solid #334155;
+        }
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #c084fc, #60a5fa);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .sub {
+            color: #94a3b8;
+            margin-bottom: 28px;
+            border-left: 3px solid #3b82f6;
+            padding-left: 12px;
+            font-size: 0.9rem;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+        }
+        input, textarea {
+            width: 100%;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 12px 16px;
+            color: #f1f5f9;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 2px rgba(96,165,250,0.3);
+        }
+        textarea {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            resize: vertical;
+            font-size: 0.8rem;
+        }
+        .key-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .key-row input {
+            flex: 1;
+        }
+        button {
+            background: #3b82f6;
+            border: none;
+            border-radius: 40px;
+            padding: 10px 18px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.05s;
+            font-size: 0.9rem;
+        }
+        button.secondary {
+            background: #334155;
+        }
+        button.secondary:hover {
+            background: #475569;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        .gen-btn {
+            margin-top: 8px;
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            background: #10b981;
+        }
+        .gen-btn:hover {
+            background: #059669;
+        }
+        .output {
+            margin-top: 28px;
+            border-top: 1px solid #334155;
+            padding-top: 20px;
+        }
+        .config-box {
+            background: #0f172a;
+            border-radius: 20px;
+            padding: 16px;
+            font-family: monospace;
+            font-size: 0.75rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 280px;
+            overflow: auto;
+            border: 1px solid #2d3a5e;
+        }
+        .flex-btns {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        hr {
+            border-color: #334155;
+            margin: 20px 0;
+        }
+        .info {
+            background: #0f172a80;
+            border-radius: 16px;
+            padding: 12px;
+            font-size: 0.8rem;
+            color: #9ca3af;
+            margin-top: 16px;
+        }
+        .badge {
+            background: #2d3748;
+            border-radius: 40px;
+            padding: 4px 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+        @media (max-width: 550px) {
+            .card {
+                padding: 18px;
+            }
+            .key-row {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+    <!-- Библиотека для генерации ключей Curve25519 (TweetNaCl.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script>
 </head>
 <body>
-    <div class="telegram-warning" id="telegramWarning" style="display: none;">
-        ⚠️ Не открывайте сайт через встроенный браузер Telegram, иначе скачивание не сработает.<br>
-        Нажмите три точки → «Открыть в браузере».
+<div class="card">
+    <h1>⚡ Warp + WireGuard Generator</h1>
+    <div class="sub">Локальная генерация ключей · Конфигурация для Cloudflare WARP / WireGuard</div>
+
+    <div class="form-group">
+        <label>🔑 Публичный ключ сервера (Peer)</label>
+        <input type="text" id="serverPub" placeholder="Публичный ключ сервера WARP / WireGuard" value="bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=">
+        <div class="info">☁️ Стандартный ключ WARP (IPv4) – <span class="badge">можно оставить</span></div>
     </div>
 
-    <div class="container">
-        <h1>WARP Генератор</h1>
-        <p class="subtitle">Выберите тип конфигурации</p>
-
-        <div class="button-group">
-            <button class="config-btn" data-type="amneziawg">AmneziaWG</button>
-            <button class="config-btn" data-type="clash">Clash</button>
-            <button class="config-btn" data-type="wiresock">WireSock</button>
-        </div>
-
-        <div class="preview-area">
-            <pre id="configPreview">Нажмите на кнопку, чтобы сгенерировать конфиг...</pre>
-        </div>
-
-        <button id="downloadBtn" class="download-btn" disabled>Скачать файл</button>
+    <div class="form-group">
+        <label>🌍 Endpoint сервера</label>
+        <input type="text" id="endpoint" placeholder="IP:PORT или домен:порт" value="engage.cloudflareclient.com:2408">
     </div>
 
-    <footer>
-        Генератор для AmneziaWG 1.5 (локальный, без внешних запросов)
-    </footer>
+    <div class="form-group">
+        <label>📡 DNS серверы (через запятую)</label>
+        <input type="text" id="dns" value="1.1.1.1, 1.0.0.1">
+    </div>
 
-    <script src="script.js"></script>
+    <div class="form-group">
+        <label>🌐 IP-адрес клиента (Interface Address)</label>
+        <input type="text" id="clientIp" placeholder="например 172.16.0.2/32, fd01::2/128" value="172.16.0.2/32">
+        <div class="info">Можно указать IPv4 и IPv6 через запятую, например <code>172.16.0.2/32, fd01::2/128</code></div>
+    </div>
+
+    <div class="form-group">
+        <label>🚀 AllowedIPs (разрешённые маршруты)</label>
+        <input type="text" id="allowedIps" value="0.0.0.0/0, ::/0">
+    </div>
+
+    <div class="form-group">
+        <label>🔐 Ваши ключи WireGuard (генерируются автоматически)</label>
+        <div class="key-row">
+            <input type="text" id="privKey" placeholder="Приватный ключ" readonly>
+            <button class="secondary" id="regenerateKeys">⟳ Перегенерировать</button>
+        </div>
+        <div class="key-row" style="margin-top: 8px;">
+            <input type="text" id="pubKey" placeholder="Публичный ключ" readonly>
+        </div>
+    </div>
+
+    <button id="generateConfigBtn" class="gen-btn">✨ Собрать и показать конфигурацию</button>
+
+    <div class="output" id="outputArea" style="display: none;">
+        <label>📄 Конфигурация (файл .conf)</label>
+        <div class="config-box" id="configText"></div>
+        <div class="flex-btns">
+            <button id="downloadBtn">⬇ Скачать .conf</button>
+            <button id="copyBtn">📋 Скопировать</button>
+        </div>
+    </div>
+    <div class="info" style="margin-top: 24px;">
+        🔒 Все ключи генерируются в вашем браузере и не покидают устройство.<br>
+        ⚠️ Если вы используете WARP, обычно endpoint: <strong>engage.cloudflareclient.com:2408</strong>, публичный ключ сервера может меняться. Актуальный можно найти в интернете.
+    </div>
+</div>
+
+<script>
+    // Генерация пары ключей WireGuard (Curve25519) с помощью TweetNaCl
+    function generateWireGuardKeys() {
+        const keyPair = nacl.box.keyPair();
+        // Приватный ключ и публичный ключ в base64 (WireGuard использует стандартный base64)
+        const privBase64 = btoa(String.fromCharCode.apply(null, keyPair.secretKey));
+        const pubBase64 = btoa(String.fromCharCode.apply(null, keyPair.publicKey));
+        return { priv: privBase64, pub: pubBase64 };
+    }
+
+    function setKeysToInputs() {
+        const keys = generateWireGuardKeys();
+        document.getElementById('privKey').value = keys.priv;
+        document.getElementById('pubKey').value = keys.pub;
+        return keys;
+    }
+
+    // При загрузке страницы сгенерируем первую пару
+    let currentKeys = setKeysToInputs();
+
+    document.getElementById('regenerateKeys').addEventListener('click', () => {
+        currentKeys = setKeysToInputs();
+        // если конфиг уже был показан – можно скрыть, чтобы не было путаницы
+        document.getElementById('outputArea').style.display = 'none';
+    });
+
+    function buildConfig() {
+        const serverPub = document.getElementById('serverPub').value.trim();
+        const endpoint = document.getElementById('endpoint').value.trim();
+        const dnsRaw = document.getElementById('dns').value.trim();
+        let dns = dnsRaw;
+        if (dns.includes(',')) {
+            dns = dnsRaw.split(',').map(s => s.trim()).join(', ');
+        }
+        const clientIpRaw = document.getElementById('clientIp').value.trim();
+        let addresses = clientIpRaw;
+        if (clientIpRaw.includes(',')) {
+            addresses = clientIpRaw.split(',').map(s => s.trim()).join(', ');
+        }
+        const allowedIpsRaw = document.getElementById('allowedIps').value.trim();
+        let allowedIPs = allowedIpsRaw;
+        if (allowedIpsRaw.includes(',')) {
+            allowedIPs = allowedIpsRaw.split(',').map(s => s.trim()).join(', ');
+        }
+
+        const privKey = document.getElementById('privKey').value;
+        if (!privKey) {
+            alert('Сначала сгенерируйте ключи (они уже должны быть)');
+            return null;
+        }
+        if (!serverPub || !endpoint) {
+            alert('Заполните публичный ключ сервера и endpoint');
+            return null;
+        }
+
+        let config = `[Interface]\n`;
+        config += `PrivateKey = ${privKey}\n`;
+        config += `Address = ${addresses}\n`;
+        config += `DNS = ${dns}\n\n`;
+        config += `[Peer]\n`;
+        config += `PublicKey = ${serverPub}\n`;
+        config += `Endpoint = ${endpoint}\n`;
+        config += `AllowedIPs = ${allowedIPs}\n`;
+        config += `PersistentKeepalive = 25\n`;
+        return config;
+    }
+
+    const outputDiv = document.getElementById('outputArea');
+    const configTextPre = document.getElementById('configText');
+    let currentConfig = '';
+
+    function updateOutput() {
+        const conf = buildConfig();
+        if (!conf) return;
+        currentConfig = conf;
+        configTextPre.innerText = conf;
+        outputDiv.style.display = 'block';
+    }
+
+    document.getElementById('generateConfigBtn').addEventListener('click', updateOutput);
+
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+        if (!currentConfig) {
+            alert('Сначала сгенерируйте конфигурацию');
+            return;
+        }
+        const blob = new Blob([currentConfig], { type: 'text/plain' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = 'warp.conf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+        if (!currentConfig) {
+            alert('Сначала сгенерируйте конфигурацию');
+            return;
+        }
+        try {
+            await navigator.clipboard.writeText(currentConfig);
+            alert('✅ Конфигурация скопирована в буфер обмена');
+        } catch (err) {
+            alert('Не удалось скопировать: ' + err);
+        }
+    });
+
+    // Дополнительно: автоматически сгенерировать первую конфигурацию? Не обязательно, но можно показать при старте
+    // По желанию можно показать пример сразу, но оставим кнопку.
+</script>
 </body>
 </html>
