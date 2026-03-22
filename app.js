@@ -1,43 +1,22 @@
-function generateKey(length = 32) {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let key = '';
-    for (let i = 0; i < length; i++) {
-        key += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return key;
-}
-
 function generateConfig() {
-    const privateKey = generateKey(43);
-    const publicKey = generateKey(43);
-    const endpoint = '162.159.193.10:2408';
+    const privateKey = generateKey(43); // base64 приватный ключ клиента
+    const serverPublicKey = "ТУТ_ВСТАВЬ_PUBLIC_KEY_СЕРВЕРА"; // PublicKey сервера
+    const endpoint = "SERVER_IP:51820"; // IP:порт сервера
+
+    // Случайный IP для клиента
+    const clientIP = `10.66.66.${Math.floor(Math.random() * 200 + 2)}/32`;
 
     const config = `
 [Interface]
 PrivateKey = ${privateKey}
-Address = 172.16.0.2/32
+Address = ${clientIP}
 DNS = 1.1.1.1
 
 [Peer]
-PublicKey = ${publicKey}
+PublicKey = ${serverPublicKey}
 AllowedIPs = 0.0.0.0/0, ::/0
 Endpoint = ${endpoint}
+PersistentKeepalive = 25
     `;
     return config.trim();
 }
-
-function generateQRCode(text) {
-    const qrContainer = document.getElementById('qrcode');
-    qrContainer.innerHTML = '';
-    new QRCode(qrContainer, {
-        text: text,
-        width: 200,
-        height: 200
-    });
-}
-
-document.getElementById('generateBtn').addEventListener('click', () => {
-    const config = generateConfig();
-    document.getElementById('configOutput').value = config;
-    generateQRCode(config);
-});
