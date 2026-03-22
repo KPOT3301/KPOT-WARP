@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Warp Config Generator — WireGuard / Cloudflare WARP</title>
+    <title>Warp / AmneziaWG Config Generator</title>
     <style>
         * {
             box-sizing: border-box;
@@ -20,7 +20,7 @@
             padding: 20px;
         }
         .card {
-            max-width: 680px;
+            max-width: 720px;
             width: 100%;
             background: #1e293b;
             border-radius: 28px;
@@ -55,7 +55,7 @@
             color: #cbd5e1;
             font-size: 0.9rem;
         }
-        input, textarea {
+        input, select {
             width: 100%;
             background: #0f172a;
             border: 1px solid #334155;
@@ -65,15 +65,10 @@
             font-size: 0.9rem;
             transition: all 0.2s;
         }
-        input:focus, textarea:focus {
+        input:focus, select:focus {
             outline: none;
             border-color: #60a5fa;
             box-shadow: 0 0 0 2px rgba(96,165,250,0.3);
-        }
-        textarea {
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            resize: vertical;
-            font-size: 0.8rem;
         }
         .key-row {
             display: flex;
@@ -126,7 +121,7 @@
             font-size: 0.75rem;
             white-space: pre-wrap;
             word-break: break-all;
-            max-height: 300px;
+            max-height: 320px;
             overflow: auto;
             border: 1px solid #2d3a5e;
         }
@@ -135,10 +130,6 @@
             gap: 12px;
             margin-top: 16px;
             flex-wrap: wrap;
-        }
-        hr {
-            border-color: #334155;
-            margin: 20px 0;
         }
         .info {
             background: #0f172a80;
@@ -156,6 +147,48 @@
             font-weight: 500;
             display: inline-block;
         }
+        .mode-switch {
+            display: flex;
+            gap: 12px;
+            background: #0f172a;
+            border-radius: 40px;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+        .mode-btn {
+            flex: 1;
+            text-align: center;
+            background: transparent;
+            border-radius: 36px;
+            padding: 8px 0;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .mode-btn.active {
+            background: #3b82f6;
+            color: white;
+        }
+        .obf-params {
+            display: none;
+            background: #0f172a;
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .param-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .param-row .param {
+            flex: 1;
+            min-width: 100px;
+        }
+        .param-row label {
+            font-size: 0.75rem;
+            margin-bottom: 4px;
+        }
         @media (max-width: 550px) {
             .card {
                 padding: 18px;
@@ -169,8 +202,13 @@
 </head>
 <body>
 <div class="card">
-    <h1>⚡ Warp + WireGuard Generator</h1>
-    <div class="sub">Локальная генерация ключей · Конфигурация для Cloudflare WARP / WireGuard</div>
+    <h1>⚡ Warp / AmneziaWG Generator</h1>
+    <div class="sub">Локальная генерация ключей · WireGuard или AmneziaWG (обфускация)</div>
+
+    <div class="mode-switch" id="modeSwitch">
+        <button class="mode-btn active" data-mode="wireguard">WireGuard</button>
+        <button class="mode-btn" data-mode="amnezia">AmneziaWG (обфускация)</button>
+    </div>
 
     <div class="form-group">
         <label>🔑 Публичный ключ сервера (Peer)</label>
@@ -199,6 +237,54 @@
         <input type="text" id="allowedIps" value="0.0.0.0/0, ::/0">
     </div>
 
+    <!-- Блок параметров Amnezia (по умолчанию скрыт) -->
+    <div id="amneziaParams" class="obf-params">
+        <div class="param-row">
+            <div class="param">
+                <label>MTU</label>
+                <input type="number" id="mtu" value="1280">
+            </div>
+            <div class="param">
+                <label>Jc</label>
+                <input type="number" id="jc" value="3">
+            </div>
+            <div class="param">
+                <label>Jmin</label>
+                <input type="number" id="jmin" value="40">
+            </div>
+            <div class="param">
+                <label>Jmax</label>
+                <input type="number" id="jmax" value="70">
+            </div>
+        </div>
+        <div class="param-row">
+            <div class="param">
+                <label>S1</label>
+                <input type="number" id="s1" value="0">
+            </div>
+            <div class="param">
+                <label>S2</label>
+                <input type="number" id="s2" value="0">
+            </div>
+            <div class="param">
+                <label>H1</label>
+                <input type="number" id="h1" value="1">
+            </div>
+            <div class="param">
+                <label>H2</label>
+                <input type="number" id="h2" value="2">
+            </div>
+            <div class="param">
+                <label>H3</label>
+                <input type="number" id="h3" value="3">
+            </div>
+            <div class="param">
+                <label>H4</label>
+                <input type="number" id="h4" value="4">
+            </div>
+        </div>
+    </div>
+
     <div class="form-group">
         <label>🔐 Ваши ключи WireGuard (генерируются автоматически)</label>
         <div class="key-row">
@@ -222,13 +308,13 @@
     </div>
     <div class="info" style="margin-top: 24px;">
         🔒 Все ключи генерируются в вашем браузере и не покидают устройство.<br>
-        ⚠️ Если вы используете WARP, обычно endpoint: <strong>engage.cloudflareclient.com:2408</strong>, публичный ключ сервера может меняться. Актуальный можно найти в интернете.<br>
-        ✅ Файл конфигурации сохраняется с расширением <strong>.conf</strong> — совместим с WireGuard-клиентами.
+        ⚠️ Для AmneziaWG выберите соответствующий протокол в клиенте и используйте сгенерированный конфиг.<br>
+        ✅ Файл сохраняется с расширением <strong>.conf</strong>.
     </div>
 </div>
 
 <script>
-    // Генерация пары ключей WireGuard (Curve25519) с помощью TweetNaCl
+    // Генерация ключей
     function generateWireGuardKeys() {
         const keyPair = nacl.box.keyPair();
         const privBase64 = btoa(String.fromCharCode.apply(null, keyPair.secretKey));
@@ -250,6 +336,32 @@
         document.getElementById('outputArea').style.display = 'none';
     });
 
+    // Переключение режимов
+    let currentMode = 'wireguard'; // 'wireguard' или 'amnezia'
+    const modeSwitch = document.getElementById('modeSwitch');
+    const amneziaParamsDiv = document.getElementById('amneziaParams');
+
+    function setMode(mode) {
+        currentMode = mode;
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            if (btn.dataset.mode === mode) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        amneziaParamsDiv.style.display = (mode === 'amnezia') ? 'block' : 'none';
+        // Скрываем предыдущий вывод, т.к. конфиг изменится
+        document.getElementById('outputArea').style.display = 'none';
+    }
+
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            setMode(btn.dataset.mode);
+        });
+    });
+
+    // Сборка конфигурации
     function buildConfig() {
         const serverPub = document.getElementById('serverPub').value.trim();
         const endpoint = document.getElementById('endpoint').value.trim();
@@ -282,8 +394,34 @@
         let config = `[Interface]\n`;
         config += `PrivateKey = ${privKey}\n`;
         config += `Address = ${addresses}\n`;
-        config += `DNS = ${dns}\n\n`;
-        config += `[Peer]\n`;
+        config += `DNS = ${dns}\n`;
+
+        // Если режим Amnezia, добавляем дополнительные параметры
+        if (currentMode === 'amnezia') {
+            const mtu = document.getElementById('mtu').value;
+            const jc = document.getElementById('jc').value;
+            const jmin = document.getElementById('jmin').value;
+            const jmax = document.getElementById('jmax').value;
+            const s1 = document.getElementById('s1').value;
+            const s2 = document.getElementById('s2').value;
+            const h1 = document.getElementById('h1').value;
+            const h2 = document.getElementById('h2').value;
+            const h3 = document.getElementById('h3').value;
+            const h4 = document.getElementById('h4').value;
+
+            if (mtu) config += `MTU = ${mtu}\n`;
+            if (jc) config += `Jc = ${jc}\n`;
+            if (jmin) config += `Jmin = ${jmin}\n`;
+            if (jmax) config += `Jmax = ${jmax}\n`;
+            if (s1) config += `S1 = ${s1}\n`;
+            if (s2) config += `S2 = ${s2}\n`;
+            if (h1) config += `H1 = ${h1}\n`;
+            if (h2) config += `H2 = ${h2}\n`;
+            if (h3) config += `H3 = ${h3}\n`;
+            if (h4) config += `H4 = ${h4}\n`;
+        }
+
+        config += `\n[Peer]\n`;
         config += `PublicKey = ${serverPub}\n`;
         config += `Endpoint = ${endpoint}\n`;
         config += `AllowedIPs = ${allowedIPs}\n`;
@@ -305,7 +443,7 @@
 
     document.getElementById('generateConfigBtn').addEventListener('click', updateOutput);
 
-    // Исправленное скачивание с явным именем .conf и правильным MIME-типом
+    // Скачивание с расширением .conf
     document.getElementById('downloadBtn').addEventListener('click', () => {
         if (!currentConfig) {
             alert('Сначала сгенерируйте конфигурацию');
@@ -334,9 +472,6 @@
             alert('Не удалось скопировать: ' + err);
         }
     });
-
-    // Опционально: показываем подсказку, если кликнуть по полю с приватным ключом
-    // для удобства можно добавить автообновление при изменении параметров, но оставим по кнопке
 </script>
 </body>
 </html>
