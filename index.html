@@ -2,21 +2,37 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>WARP Генератор</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="telegram-warning" id="telegramWarning" style="display: none;">
+        ⚠️ Пожалуйста, не открывайте сайт через встроенный браузер Telegram, иначе у вас не получится скачать файлы.<br>
+        Чтобы открыть сайт в обычном браузере, нажмите на три точки в правом верхнем углу экрана и выберите «Открыть в браузере».
+    </div>
+
     <div class="container">
         <h1>WARP Генератор</h1>
-        <div class="buttons">
-            <button data-type="amneziawg">AmneziaWG</button>
-            <button data-type="clash">Clash</button>
-            <button data-type="wiresock">WireSock</button>
+        <p class="subtitle">Выберите тип конфигурации</p>
+
+        <div class="button-group">
+            <button class="config-btn" data-type="amneziawg">AmneziaWG</button>
+            <button class="config-btn" data-type="clash">Clash</button>
+            <button class="config-btn" data-type="wiresock">WireSock</button>
         </div>
-        <pre id="config-preview"></pre>
-        <button id="download-btn" disabled>Скачать</button>
+
+        <div class="preview-area">
+            <pre id="configPreview">Нажмите на кнопку, чтобы сгенерировать конфиг...</pre>
+        </div>
+
+        <button id="downloadBtn" class="download-btn" disabled>Скачать файл</button>
     </div>
+
+    <footer>
+        Сделано на основе <a href="https://warp.llimonix.dev" target="_blank" rel="noopener noreferrer">warp.llimonix.dev</a>
+    </footer>
+
     <script src="script.js"></script>
 </body>
 </html>
