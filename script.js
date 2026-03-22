@@ -1,11 +1,10 @@
 // ======================== КОНФИГУРАЦИЯ ========================
-// Укажите правильный URL вашего API (если отличается от предположительного)
-// Оригинальный сайт использует warp.llimonix.dev, но точные эндпоинты могут быть иными.
-// Рекомендуется открыть оригинальный сайт, нажать F12 → Network и посмотреть,
-// какой запрос отправляется при выборе типа конфигурации.
-const API_BASE = 'https://warp.llimonix.dev'; // замените при необходимости
-// Предполагаемый формат: GET /generate?type=amneziawg (или clash, wiresock)
-// Если нужно POST с телом — измените функцию fetchConfig().
+// Оригинальный API (проверено: POST /generate с JSON {"type": "..."})
+const API_URL = 'https://warp.llimonix.dev/generate';
+
+// Если API возвращает ошибку CORS, используйте публичный прокси:
+// const PROXY = 'https://cors-anywhere.herokuapp.com/';
+// const API_URL = PROXY + 'https://warp.llimonix.dev/generate';
 
 // ======================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ========================
 let currentConfig = null;
@@ -29,36 +28,26 @@ if (isTelegramWebView()) {
 
 // ======================== ФУНКЦИЯ ЗАПРОСА К API ========================
 async function fetchConfig(type) {
-    // Показываем загрузку в превью
+    // Показываем загрузку
     configPreview.textContent = '⏳ Генерация конфигурации...';
     downloadBtn.disabled = true;
     currentConfig = null;
 
     try {
-        // Пытаемся отправить GET-запрос (как на многих генераторах)
-        // Если API требует POST, измените метод и тело запроса.
-        const response = await fetch(`${API_BASE}/generate?type=${type}`, {
-            method: 'GET',
+        const response = await fetch(API_URL, {
+            method: 'POST',
             headers: {
-                'Accept': 'text/plain, application/json',
-            }
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ type: type })
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
+            throw new Error(`HTTP ${response.status} ${response.statusText}`);
         }
 
-        // Определяем тип ответа: возможно, это текст или JSON с полем config
-        const contentType = response.headers.get('content-type');
-        let configText;
-
-        if (contentType && contentType.includes('application/json')) {
-            const data = await response.json();
-            // Предположим, что конфиг лежит в поле 'config' или 'data'
-            configText = data.config || data.data || JSON.stringify(data, null, 2);
-        } else {
-            configText = await response.text();
-        }
+        // Ответ приходит в виде текста конфигурации
+        const configText = await response.text();
 
         if (!configText || configText.trim() === '') {
             throw new Error('Пустой ответ от сервера');
@@ -71,7 +60,7 @@ async function fetchConfig(type) {
 
     } catch (error) {
         console.error('Ошибка генерации:', error);
-        configPreview.textContent = `❌ Ошибка при получении конфигурации.\nПроверьте API URL в script.js.\nДетали: ${error.message}`;
+        configPreview.textContent = `❌ Ошибка при получении конфигурации.\nДетали: ${error.message}\n\nЕсли ошибка связана с CORS, попробуйте раскомментировать строку с прокси в script.js.`;
         downloadBtn.disabled = true;
         currentConfig = null;
     }
@@ -105,15 +94,3 @@ downloadBtn.addEventListener('click', () => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 });
-
-// ======================== ДОПОЛНИТЕЛЬНО: ПРОВЕРКА РАБОТОСПОСОБНОСТИ API ========================
-// Можно раскомментировать для отладки, но в продакшене убрать
-// (async () => {
-//     console.log('Testing API availability...');
-//     try {
-//         const testResp = await fetch(`${API_BASE}/generate?type=amneziawg`, { method: 'HEAD' });
-//         console.log('API reachable:', testResp.ok);
-//     } catch(e) {
-//         console.warn('API unreachable. Check API_BASE in script.js');
-//     }
-// })();
