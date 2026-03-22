@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Warp Config Generator</title>
+    <title>Warp Config Generator — WireGuard / Cloudflare WARP</title>
     <style>
         * {
             box-sizing: border-box;
@@ -20,7 +20,7 @@
             padding: 20px;
         }
         .card {
-            max-width: 650px;
+            max-width: 680px;
             width: 100%;
             background: #1e293b;
             border-radius: 28px;
@@ -126,7 +126,7 @@
             font-size: 0.75rem;
             white-space: pre-wrap;
             word-break: break-all;
-            max-height: 280px;
+            max-height: 300px;
             overflow: auto;
             border: 1px solid #2d3a5e;
         }
@@ -165,7 +165,6 @@
             }
         }
     </style>
-    <!-- Библиотека для генерации ключей Curve25519 (TweetNaCl.js) -->
     <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script>
 </head>
 <body>
@@ -223,7 +222,8 @@
     </div>
     <div class="info" style="margin-top: 24px;">
         🔒 Все ключи генерируются в вашем браузере и не покидают устройство.<br>
-        ⚠️ Если вы используете WARP, обычно endpoint: <strong>engage.cloudflareclient.com:2408</strong>, публичный ключ сервера может меняться. Актуальный можно найти в интернете.
+        ⚠️ Если вы используете WARP, обычно endpoint: <strong>engage.cloudflareclient.com:2408</strong>, публичный ключ сервера может меняться. Актуальный можно найти в интернете.<br>
+        ✅ Файл конфигурации сохраняется с расширением <strong>.conf</strong> — совместим с WireGuard-клиентами.
     </div>
 </div>
 
@@ -231,7 +231,6 @@
     // Генерация пары ключей WireGuard (Curve25519) с помощью TweetNaCl
     function generateWireGuardKeys() {
         const keyPair = nacl.box.keyPair();
-        // Приватный ключ и публичный ключ в base64 (WireGuard использует стандартный base64)
         const privBase64 = btoa(String.fromCharCode.apply(null, keyPair.secretKey));
         const pubBase64 = btoa(String.fromCharCode.apply(null, keyPair.publicKey));
         return { priv: privBase64, pub: pubBase64 };
@@ -244,12 +243,10 @@
         return keys;
     }
 
-    // При загрузке страницы сгенерируем первую пару
     let currentKeys = setKeysToInputs();
 
     document.getElementById('regenerateKeys').addEventListener('click', () => {
         currentKeys = setKeysToInputs();
-        // если конфиг уже был показан – можно скрыть, чтобы не было путаницы
         document.getElementById('outputArea').style.display = 'none';
     });
 
@@ -258,7 +255,7 @@
         const endpoint = document.getElementById('endpoint').value.trim();
         const dnsRaw = document.getElementById('dns').value.trim();
         let dns = dnsRaw;
-        if (dns.includes(',')) {
+        if (dnsRaw.includes(',')) {
             dns = dnsRaw.split(',').map(s => s.trim()).join(', ');
         }
         const clientIpRaw = document.getElementById('clientIp').value.trim();
@@ -308,12 +305,13 @@
 
     document.getElementById('generateConfigBtn').addEventListener('click', updateOutput);
 
+    // Исправленное скачивание с явным именем .conf и правильным MIME-типом
     document.getElementById('downloadBtn').addEventListener('click', () => {
         if (!currentConfig) {
             alert('Сначала сгенерируйте конфигурацию');
             return;
         }
-        const blob = new Blob([currentConfig], { type: 'text/plain' });
+        const blob = new Blob([currentConfig], { type: 'application/wireguard-config' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
         link.href = url;
@@ -337,8 +335,8 @@
         }
     });
 
-    // Дополнительно: автоматически сгенерировать первую конфигурацию? Не обязательно, но можно показать при старте
-    // По желанию можно показать пример сразу, но оставим кнопку.
+    // Опционально: показываем подсказку, если кликнуть по полю с приватным ключом
+    // для удобства можно добавить автообновление при изменении параметров, но оставим по кнопке
 </script>
 </body>
 </html>
