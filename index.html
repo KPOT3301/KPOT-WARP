@@ -3,18 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warp Generator</title>
+    <title>Amnezia WG Generator</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>Warp Config Generator</h1>
-        <button id="generateBtn">Сгенерировать конфиг</button>
+        <h1>Amnezia WG Generator</h1>
+        <div class="form">
+            <label>Диапазон IP для клиента:</label>
+            <input type="text" id="ipRange" value="10.66.66">
+            
+            <label>DNS (через запятую):</label>
+            <input type="text" id="dns" value="1.1.1.1">
+            
+            <button id="generateBtn">Сгенерировать конфиг</button>
+        </div>
+
         <textarea id="configOutput" readonly placeholder="Конфиг появится здесь"></textarea>
         <div id="qrcode"></div>
     </div>
 
-    <!-- QR Code Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="app.js"></script>
 </body>
