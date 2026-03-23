@@ -47,7 +47,7 @@
             gap: 20px;
             margin-bottom: 30px;
         }
-        .containerAWG, .containerClash {
+        .containerAWG {
             background: #15171c;
             border-radius: 20px;
             padding: 16px;
@@ -262,24 +262,6 @@
             color: #3b82f6;
             text-decoration: none;
         }
-        .throne-textarea {
-            width: 100%;
-            background: #0f1117;
-            color: #e0e0e0;
-            border: 1px solid #2a2c33;
-            border-radius: 12px;
-            padding: 12px;
-            font-family: monospace;
-            font-size: 13px;
-            resize: vertical;
-        }
-        .copy-throne-btn {
-            background: #3b82f6;
-            margin-top: 16px;
-            width: auto;
-            padding: 8px 20px;
-            border-radius: 40px;
-        }
         .popup-message {
             position: fixed;
             bottom: 20px;
@@ -319,42 +301,9 @@
                 <span>🔒 AmneziaWG</span>
                 <button id="infoButton" class="info-button" aria-label="Настройки">⚙️</button>
             </div>
-            <button id="generateButton1" class="get-btn1" style="display:none"><span class="button__text">Стандартный конфиг</span></button>
             <button id="generateButton2" class="get-btn2"><span class="button__text">AWG 1.5 (1 вариант)</span></button>
             <button id="generateButton3" class="get-btn3"><span class="button__text">AWG 1.5 (2 вариант)</span></button>
             <button id="generateButton4" class="get-btn4"><span class="button__text">AWG 1.5 (3 вариант)</span></button>
-        </div>
-        <div id="clash" class="containerClash">
-            <div class="header">
-                <span>⚔️ Clash</span>
-            </div>
-            <button id="generateButton5" class="get-btn5"><span class="button__text">AWG 1.5</span></button>
-        </div>
-        <div id="throne" class="containerAWG" style="display:none">
-            <div class="header">
-                <span>👑 Throne</span>
-            </div>
-            <button id="generateButton6" class="get-btn6"><span class="button__text">WARP</span></button>
-        </div>
-        <div id="wiresock" class="containerAWG">
-            <div class="header">
-                <span>🔌 WireSock</span>
-                <button id="infoButton2" class="info-button" aria-label="Настройки">⚙️</button>
-            </div>
-            <button id="generateButton10" class="get-btn10"><span class="button__text">AWG 1.5</span></button>
-        </div>
-        <div id="hiddify" class="containerAWG" style="display:none">
-            <div class="header">
-                <span>📦 Karing / Hiddify</span>
-            </div>
-            <button id="generateButton9" class="get-btn9"><span class="button__text">WARP</span></button>
-        </div>
-        <div id="neko" class="containerAWG" style="display:none">
-            <div class="header">
-                <span>🐱 NekoBox / Husi</span>
-            </div>
-            <button id="generateButton7" class="get-btn7"><span class="button__text">NekoRay/Exclave</span></button>
-            <button id="generateButton8" class="get-btn8"><span class="button__text">Husi</span></button>
         </div>
     </div>
     <button id="telegramButton"><span class="button__text">📱 Telegram</span></button>
@@ -415,27 +364,11 @@
     </div>
 </div>
 
-<div id="ThroneModal" class="modal2">
-    <div id="throne-content" class="modal-content2">
-        <span id="close2" class="close">&times;</span>
-        <textarea id="throneText" readonly class="throne-textarea" rows="8"></textarea>
-        <button id="copyThroneButton" class="copy-throne-btn">Копировать</button>
-    </div>
-</div>
-
 <script>
-    // === УЛУЧШЕННАЯ ВЕРСИЯ С ПОВТОРНЫМИ ПОПЫТКАМИ, ТАЙМАУТАМИ И ДЕТАЛЬНЫМИ ОШИБКАМИ ===
-    const AWG = document.querySelector('.get-btn1');
+    // === УЛУЧШЕННАЯ ВЕРСИЯ С ПОВТОРНЫМИ ПОПЫТКАМИ, ТАЙМАУТАМИ И ОБРАБОТКОЙ 429 ===
     const AWGm1 = document.querySelector('.get-btn2');
     const AWGm2 = document.querySelector('.get-btn3');
     const AWGm3 = document.querySelector('.get-btn4');
-    const Clash = document.querySelector('.get-btn5');
-    const Throne = document.querySelector('.get-btn6');
-    const Neko = document.querySelector('.get-btn7');
-    const Husi = document.querySelector('.get-btn8');
-    const Karing = document.querySelector('.get-btn9');
-    const WireSock = document.querySelector('.get-btn10');
-    const container = document.querySelector('.container');
 
     function generateRandomEndpoint() {
         const ports = [500, 854, 859, 864, 878, 880, 890, 891, 894, 903, 908, 928, 934, 939, 942, 943, 945, 946, 955, 968, 987, 988, 1002, 1010, 1014, 1018, 1070, 1074, 1180, 1387, 1701, 1843, 2371, 2408, 2506, 3138, 3476, 3581, 3854, 4177, 4198, 4233, 4500, 5279, 5956, 7103, 7152, 7156, 7281, 7559, 8319, 8742, 8854, 8886];
@@ -475,16 +408,8 @@
         return 'def';
     }
 
-    function getRandomJcParams() {
-        const options = [
-            "Jc = 4\nJmin = 40\nJmax = 70",
-            "Jc = 120\nJmin = 23\nJmax = 911"
-        ];
-        return options[Math.floor(Math.random() * options.length)];
-    }
-
     // Улучшенный fetch с увеличенным таймаутом
-    const fetchWithTimeout = async (url, options = {}, timeout = 8000) => {
+    const fetchWithTimeout = async (url, options = {}, timeout = 10000) => {
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);
         try {
@@ -498,13 +423,14 @@
         }
     };
 
-    // Функция повторных попыток
-    const retryFetch = async (fn, retries = 2, delay = 1000) => {
+    // Функция повторных попыток с экспоненциальной задержкой
+    const retryFetch = async (fn, retries = 3, baseDelay = 1000) => {
         for (let i = 0; i <= retries; i++) {
             try {
                 return await fn();
             } catch (error) {
                 if (i === retries) throw error;
+                const delay = baseDelay * Math.pow(2, i);
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
         }
@@ -526,12 +452,16 @@
         const endpoints = [
             'https://keygen.warp-generator.workers.dev',
             'https://warp-generation.vercel.app/keys',
-            'https://warp-key-generator.vercel.app/api/keys'
+            'https://warp-key-generator.vercel.app/api/keys',
+            'https://warp-generator.herokuapp.com/keys'
         ];
         let lastError;
         for (let i = 0; i < endpoints.length; i++) {
             try {
                 const response = await retryFetch(() => fetchWithTimeout(endpoints[i]));
+                if (response.status === 429) {
+                    throw new Error('Слишком много запросов (429). Подождите 15 секунд.');
+                }
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const data = await response.text();
                 const keys = {
@@ -558,7 +488,8 @@
         const endpoints = [
             'https://www.warp-generator.workers.dev/wg',
             'https://warp.sub-aggregator.workers.dev/wg',
-            'https://warp-generation.vercel.app/wg'
+            'https://warp-generation.vercel.app/wg',
+            'https://warp-key-generator.vercel.app/api/wg'
         ];
         let lastError;
         for (let i = 0; i < endpoints.length; i++) {
@@ -580,9 +511,11 @@
                         locale: 'de_DE',
                     }),
                 }));
+                if (response.status === 429) {
+                    throw new Error('Слишком много запросов (429). Подождите 15 секунд.');
+                }
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const accountData = await response.json();
-                // Проверка наличия необходимых полей
                 if (!accountData?.config?.interface?.addresses?.v4 || !accountData?.config?.peers?.[0]?.public_key) {
                     throw new Error('Неполные данные аккаунта');
                 }
@@ -601,15 +534,13 @@
 
     const extractKey = (data, keyName) => data.match(new RegExp(`${keyName}:\\s(.+)`))?.[1].trim() || null;
 
-    const generateReserved = (clientId) => Array.from(atob(clientId)).map((char) => char.charCodeAt(0)).slice(0, 3).join(', ');
-
     const showPopup = (message, type = 'success') => {
         const popup = document.createElement('div');
         popup.className = 'popup-message';
         popup.textContent = message;
         if (type === 'error') popup.style.backgroundColor = '#d32f2f';
         document.body.appendChild(popup);
-        setTimeout(() => { if (popup.parentNode) popup.parentNode.removeChild(popup); }, 3500);
+        setTimeout(() => { if (popup.parentNode) popup.parentNode.removeChild(popup); }, 4000);
     };
 
     const downloadConfig = (fileName, content) => {
@@ -622,23 +553,33 @@
         document.body.removeChild(element);
     };
 
-    // === ВСЕ ОБРАБОТЧИКИ (с детализированными ошибками) ===
-    // AWG
-    AWG?.addEventListener('click', async () => {
-        const button = document.getElementById('generateButton1');
+    // Блокировка кнопки на 15 секунд при 429
+    const blockButton = (button, seconds = 15) => {
         if (!button) return;
-        const randomNumber = Math.floor(Math.random() * (99 - 10 + 1)) + 10;
         button.disabled = true;
-        button.classList.add("button--loading");
-        try {
-            const { publicKey, privateKey } = await fetchKeys();
-            const installId = generateRandomString(22);
-            const fcmToken = `${installId}:APA91b${generateRandomString(134)}`;
-            const accountData = await fetchAccount(publicKey, installId, fcmToken);
-            const selectedDNS = getSelectedDNS();
-            const allowedIPs = getSelectedSites();
-            const randomEndpoint = generateRandomEndpoint();
-            const wireGuardText = `[Interface]
+        setTimeout(() => {
+            button.disabled = false;
+        }, seconds * 1000);
+    };
+
+    // Общий обработчик для AWG вариантов
+    const createAWGHandler = (variant) => {
+        return async (buttonId) => {
+            const button = document.getElementById(buttonId);
+            if (!button) return;
+            const randomNumber = Math.floor(Math.random() * (99 - 10 + 1)) + 10;
+            button.disabled = true;
+            button.classList.add("button--loading");
+            try {
+                const { publicKey, privateKey } = await fetchKeys();
+                const installId = generateRandomString(22);
+                const fcmToken = `${installId}:APA91b${generateRandomString(134)}`;
+                const accountData = await fetchAccount(publicKey, installId, fcmToken);
+                const selectedDNS = getSelectedDNS();
+                const allowedIPs = getSelectedSites();
+                const randomEndpoint = generateRandomEndpoint();
+                
+                let wireGuardText = `[Interface]
 PrivateKey = ${privateKey}
 Address = ${accountData.config.interface.addresses.v4}, ${accountData.config.interface.addresses.v6}
 DNS = ${selectedDNS}
@@ -651,457 +592,51 @@ Jmax = 70
 H1 = 1
 H2 = 2
 H3 = 3
-H4 = 4
+H4 = 4`;
 
-[Peer]
-PublicKey = ${accountData.config.peers[0].public_key}
-AllowedIPs = ${allowedIPs}
-Endpoint = ${randomEndpoint}`;
-            downloadConfig(`WARPr_${randomNumber}.conf`, wireGuardText);
-            showPopup('Конфигурация успешно скачана');
-        } catch (error) {
-            console.error(error);
-            showPopup(`Ошибка: ${error.message}`, 'error');
-        } finally {
-            button.disabled = false;
-            button.classList.remove("button--loading");
-        }
-    });
-
-    // AWGm1
-    AWGm1?.addEventListener('click', async () => {
-        const button = document.getElementById('generateButton2');
-        if (!button) return;
-        const randomNumber = Math.floor(Math.random() * (99 - 10 + 1)) + 10;
-        button.disabled = true;
-        button.classList.add("button--loading");
-        try {
-            const { publicKey, privateKey } = await fetchKeys();
-            const installId = generateRandomString(22);
-            const fcmToken = `${installId}:APA91b${generateRandomString(134)}`;
-            const accountData = await fetchAccount(publicKey, installId, fcmToken);
-            const selectedDNS = getSelectedDNS();
-            const allowedIPs = getSelectedSites();
-            const randomEndpoint = generateRandomEndpoint();
-            const wireGuardText = `[Interface]
-PrivateKey = ${privateKey}
-Address = ${accountData.config.interface.addresses.v4}, ${accountData.config.interface.addresses.v6}
-DNS = ${selectedDNS}
-MTU = 1280
-S1 = 0
-S2 = 0
-Jc = 4
-Jmin = 40
-Jmax = 70
-H1 = 1
-H2 = 2
-H3 = 3
-H4 = 4
-I1 = <b 0xce000000010897a297ecc34cd6dd000044d0ec2e2e1ea2991f467ace4222129b5a098823784694b4897b9986ae0b7280135fa85e196d9ad980b150122129ce2a9379531b0fd3e871ca5fdb883c369832f730e272d7b8b74f393f9f0fa43f11e510ecb2219a52984410c204cf875585340c62238e14ad04dff382f2c200e0ee22fe743b9c6b8b043121c5710ec289f471c91ee414fca8b8be8419ae8ce7ffc53837f6ade262891895f3f4cecd31bc93ac5599e18e4f01b472362b8056c3172b513051f8322d1062997ef4a383b01706598d08d48c221d30e74c7ce000cdad36b706b1bf9b0607c32ec4b3203a4ee21ab64df336212b9758280803fcab14933b0e7ee1e04a7becce3e2633f4852585c567894a5f9efe9706a151b615856647e8b7dba69ab357b3982f554549bef9256111b2d67afde0b496f16962d4957ff654232aa9e845b61463908309cfd9de0a6abf5f425f577d7e5f6440652aa8da5f73588e82e9470f3b21b27b28c649506ae1a7f5f15b876f56abc4615f49911549b9bb39dd804fde182bd2dcec0c33bad9b138ca07d4a4a1650a2c2686acea05727e2a78962a840ae428f55627516e73c83dd8893b02358e81b524b4d99fda6df52b3a8d7a5291326e7ac9d773c5b43b8444554ef5aea104a738ed650aa979674bbed38da58ac29d87c29d387d80b526065baeb073ce65f075ccb56e47533aef357dceaa8293a523c5f6f790be90e4731123d3c6152a70576e90b4ab5bc5ead01576c68ab633ff7d36dcde2a0b2c68897e1acfc4d6483aaaeb635dd63c96b2b6a7a2bfe042f6aed82e5363aa850aace12ee3b1a93f30d8ab9537df483152a5527faca21efc9981b304f11fc95336f5b9637b174c5a0659e2b22e159a9fed4b8e93047371175b1d6d9cc8ab745f3b2281537d1c75fb9451871864efa5d184c38c185fd203de206751b92620f7c369e031d2041e152040920ac2c5ab5340bfc9d0561176abf10a147287ea90758575ac6a9f5ac9f390d0d5b23ee12af583383d994e22c0cf42383834bcd3ada1b3825a0664d8f3fb678261d57601ddf94a8a68a7c273a18c08aa99c7ad8c6c42eab67718843597ec9930457359dfdfbce024afc2dcf9348579a57d8d3490b2fa99f278f1c37d87dad9b221acd575192ffae1784f8e60ec7cee4068b6b988f0433d96d6a1b1865f4e155e9fe020279f434f3bf1bd117b717b92f6cd1cc9bea7d45978bcc3f24bda631a36910110a6ec06da35f8966c9279d130347594f13e9e07514fa370754d1424c0a1545c5070ef9fb2acd14233e8a50bfc5978b5bdf8bc1714731f798d21e2004117c61f2989dd44f0cf027b27d4019e81ed4b5c31db347c4a3a4d85048d7093cf16753d7b0d15e078f5c7a5205dc2f87e330a1f716738dce1c6180e9d02869b5546f1c4d2748f8c90d9693cba4e0079297d22fd61402dea32ff0eb69ebd65a5d0b687d87e3a8b2c42b648aa723c7c7daf37abcc4bb85caea2ee8f55bec20e913b3324ab8f5c3304f820d42ad1b9f2ffc1a3af9927136b4419e1e579ab4c2ae3c776d293d397d575df181e6cae0a4ada5d67ecea171cca3288d57c7bbdaee3befe745fb7d634f70386d873b90c4d6c6596bb65af68f9e5121e67ebf0d89d3c909ceedfb32ce9575a7758ff080724e1ab5d5f43074ecb53a479af21ed03d7b6899c36631c0166f9d47e5e1d4528a5d3d3f744029c4b1c190cbfbad06f5f83f7ad0429fa9a2719c56ffe3783460e166de2d8>
-
-[Peer]
-PublicKey = ${accountData.config.peers[0].public_key}
-AllowedIPs = ${allowedIPs}
-Endpoint = ${randomEndpoint}`;
-            downloadConfig(`WARPm1_${randomNumber}.conf`, wireGuardText);
-            showPopup('Конфигурация успешно скачана');
-        } catch (error) {
-            console.error(error);
-            showPopup(`Ошибка: ${error.message}`, 'error');
-        } finally {
-            button.disabled = false;
-            button.classList.remove("button--loading");
-        }
-    });
-
-    // AWGm2
-    AWGm2?.addEventListener('click', async () => {
-        const button = document.getElementById('generateButton3');
-        if (!button) return;
-        const randomNumber = Math.floor(Math.random() * (99 - 10 + 1)) + 10;
-        button.disabled = true;
-        button.classList.add("button--loading");
-        try {
-            const { publicKey, privateKey } = await fetchKeys();
-            const installId = generateRandomString(22);
-            const fcmToken = `${installId}:APA91b${generateRandomString(134)}`;
-            const accountData = await fetchAccount(publicKey, installId, fcmToken);
-            const randomEndpoint = generateRandomEndpoint();
-            const selectedDNS = getSelectedDNS();
-            const allowedIPs = getSelectedSites();
-            const wireGuardText = `[Interface]
-PrivateKey = ${privateKey}
-Address = ${accountData.config.interface.addresses.v4}, ${accountData.config.interface.addresses.v6}
-DNS = ${selectedDNS}	
-MTU = 1280
-S1 = 0
-S2 = 0
-Jc = 4
-Jmin = 40
-Jmax = 70
-H1 = 1
-H2 = 2
-H3 = 3
-H4 = 4
-I1 = <b 0xc7000000010809a1ed4edbbe7615000044d017a61a0d774f04290f119e701ef0035df2b0ed571b0b575e6a07246b856eb6ec036fef07f1e07b861251ad737abeb67e64be714c1dcd865312b1b6c35c089c997aeb5c18f808696fe97289513945d84ca846467603e94e44224877f2c1d3261e4ac18740be4bd064369c94fc08978d99b54bf615250998639010c1284248e1d73004b81fcb20b559d8a17eced7eab3964b5b88ca7a3b8579fc8c1c934189e77143b4ac434138114b1048651b56545b87acbef0952763538f3ddeb37cfc6d58b4881c3b719d7ff78f6ee1324a2914a32381c05a64c700466d280be007253bb030d179c4f1b3dc221e1974e2ee6d6e2b9e8d709159b5ef22e1783dbba845c20ca1c83b066c73835920ad70b806df0aee0351e3fc9ab1e42e8b2a30fe235ff0612eee19744949cecee0463b76514ad90c1f7ceaa557c18586ab561d49482e73c85d0143785da14a441bf82f78783b61cccd44aecb1947516e79b5ca5a6b3a8aed6040fae0eeabdc55a88dc19ade832d99fca90c7a629cacc07192d7e47e3c6a271b95b0ea3392562a06a1cab79f40ea92916ebee197b7b5f14b251824e1ed20ff2ca80b1f03a43e45157589bc61b978e97851025b3b7ccc17d291e1cb60fe48a5c26829dce11dd23c2e73265a9ebf8617c985e4fee4681e863f990061f4dea465a7d2524bd0edcf4b48d4b8f25fc359b15babd2637284a4774077dca60091f1a781cfee1bef9713dd5943a579d7470bc5970542fbb27fdf77880a8d8751b1f642c7a3f019a05ab94bf63d3525ef34e9290b5c8d477f2714e6d6e3e4d35c1983f5e16fda57fcdf071b513f8f088dbe8d5a97577d17a5383a496c3f313adfdd47c962bbaebd6aa13b46439eb742622c29ca067db0ec1853064c3cbbffe0a215a19fce47d49703ed58ebbd89721172d256d1cf30188106fb2f863186511401fad54d087aa2fb3d1b85768db386bd7102e8060ac157bac011acdcdae2799b9aee1467c3424013455bd028fcaacdc3c77d28ea199967d617ea7d0d0815f3cc407934a76d1293dccba210d1709a13e5dd67c9ba47cd113f5bdd740358eff13164159fd09bc2f7ec6cfa64d9df7e2e2f88706b0ff3a92ccf6f078456cfe0bdd89292cfe2680badc1eac9f7d36efe8eb6912c7b164508d13e6c0911c15f73c233cbe4fc70ff2ade1e1be4bbb738e0939159e2078a9438f05b756a003371f4861481c38f1cdd2d7b06deb62869e9fe79a8abaa920646fa2e8fa28f0d80c136376c7b56046bae4c05c0cdf64efb8c47bbfc5a1a4c0b045061ef0d71618e0d206a1d7f245fd5c03191b152673ba8dff8e1b8de7c50234a93cba91e3888adb228cc02beded4b1c0946797d3ef02dec2edb6ad0ac21f89f4be364c317da7c22440e9f358d512203f4b7ab20388af68b8915d0152db2c8a0687bfaea870f7529bb92a22b35bd79bc6d490591406346ecd78342ee3563c4883a8251679691c2d4e963397e24653520795511b018915374c954bddb940a9d7a16d1c8bd798fc7dbfb0599a7074e13f87e14efa8d511bb2579ec029b1bda18fe971b30fbe19e986ff2686a69bf3f1bb929de93ae70345ebca998b11e0a2b41890cba628d8f6e7c4e94790735e5299b4ff07cd3080f7d53c9cbe1911d2cd5925b3213e033c272506a87886cf761a283a779564d3241e3c28f632e166b5d756e1786ce077614c4444e3f2aed5decb3613b925ea3e558c21d4faf8ba54edd0f3a5d4>
-
-[Peer]
-PublicKey = ${accountData.config.peers[0].public_key}
-AllowedIPs = ${allowedIPs}
-Endpoint = ${randomEndpoint}`;
-            downloadConfig(`WARPm2_${randomNumber}.conf`, wireGuardText);
-            showPopup('Конфигурация успешно скачана');
-        } catch (error) {
-            console.error(error);
-            showPopup(`Ошибка: ${error.message}`, 'error');
-        } finally {
-            button.disabled = false;
-            button.classList.remove("button--loading");
-        }
-    });
-
-    // AWGm3
-    AWGm3?.addEventListener('click', async () => {
-        const button = document.getElementById('generateButton4');
-        if (!button) return;
-        const randomNumber = Math.floor(Math.random() * (99 - 10 + 1)) + 10;
-        button.disabled = true;
-        button.classList.add("button--loading");
-        try {
-            const { publicKey, privateKey } = await fetchKeys();
-            const installId = generateRandomString(22);
-            const fcmToken = `${installId}:APA91b${generateRandomString(134)}`;
-            const accountData = await fetchAccount(publicKey, installId, fcmToken);
-            const randomEndpoint = generateRandomEndpoint();
-            const selectedDNS = getSelectedDNS();
-            const allowedIPs = getSelectedSites();
-            const wireGuardText = `[Interface]
-PrivateKey = ${privateKey}
-Address = ${accountData.config.interface.addresses.v4}, ${accountData.config.interface.addresses.v6}
-DNS = ${selectedDNS}	
-MTU = 1280
-S1 = 0
-S2 = 0
-Jc = 4
-Jmin = 40
-Jmax = 70
-H1 = 1
-H2 = 2
-H3 = 3
-H4 = 4
+                if (variant === 1) {
+                    wireGuardText += `
+I1 = <b 0xce000000010897a297ecc34cd6dd000044d0ec2e2e1ea2991f467ace4222129b5a098823784694b4897b9986ae0b7280135fa85e196d9ad980b150122129ce2a9379531b0fd3e871ca5fdb883c369832f730e272d7b8b74f393f9f0fa43f11e510ecb2219a52984410c204cf875585340c62238e14ad04dff382f2c200e0ee22fe743b9c6b8b043121c5710ec289f471c91ee414fca8b8be8419ae8ce7ffc53837f6ade262891895f3f4cecd31bc93ac5599e18e4f01b472362b8056c3172b513051f8322d1062997ef4a383b01706598d08d48c221d30e74c7ce000cdad36b706b1bf9b0607c32ec4b3203a4ee21ab64df336212b9758280803fcab14933b0e7ee1e04a7becce3e2633f4852585c567894a5f9efe9706a151b615856647e8b7dba69ab357b3982f554549bef9256111b2d67afde0b496f16962d4957ff654232aa9e845b61463908309cfd9de0a6abf5f425f577d7e5f6440652aa8da5f73588e82e9470f3b21b27b28c649506ae1a7f5f15b876f56abc4615f49911549b9bb39dd804fde182bd2dcec0c33bad9b138ca07d4a4a1650a2c2686acea05727e2a78962a840ae428f55627516e73c83dd8893b02358e81b524b4d99fda6df52b3a8d7a5291326e7ac9d773c5b43b8444554ef5aea104a738ed650aa979674bbed38da58ac29d87c29d387d80b526065baeb073ce65f075ccb56e47533aef357dceaa8293a523c5f6f790be90e4731123d3c6152a70576e90b4ab5bc5ead01576c68ab633ff7d36dcde2a0b2c68897e1acfc4d6483aaaeb635dd63c96b2b6a7a2bfe042f6aed82e5363aa850aace12ee3b1a93f30d8ab9537df483152a5527faca21efc9981b304f11fc95336f5b9637b174c5a0659e2b22e159a9fed4b8e93047371175b1d6d9cc8ab745f3b2281537d1c75fb9451871864efa5d184c38c185fd203de206751b92620f7c369e031d2041e152040920ac2c5ab5340bfc9d0561176abf10a147287ea90758575ac6a9f5ac9f390d0d5b23ee12af583383d994e22c0cf42383834bcd3ada1b3825a0664d8f3fb678261d57601ddf94a8a68a7c273a18c08aa99c7ad8c6c42eab67718843597ec9930457359dfdfbce024afc2dcf9348579a57d8d3490b2fa99f278f1c37d87dad9b221acd575192ffae1784f8e60ec7cee4068b6b988f0433d96d6a1b1865f4e155e9fe020279f434f3bf1bd117b717b92f6cd1cc9bea7d45978bcc3f24bda631a36910110a6ec06da35f8966c9279d130347594f13e9e07514fa370754d1424c0a1545c5070ef9fb2acd14233e8a50bfc5978b5bdf8bc1714731f798d21e2004117c61f2989dd44f0cf027b27d4019e81ed4b5c31db347c4a3a4d85048d7093cf16753d7b0d15e078f5c7a5205dc2f87e330a1f716738dce1c6180e9d02869b5546f1c4d2748f8c90d9693cba4e0079297d22fd61402dea32ff0eb69ebd65a5d0b687d87e3a8b2c42b648aa723c7c7daf37abcc4bb85caea2ee8f55bec20e913b3324ab8f5c3304f820d42ad1b9f2ffc1a3af9927136b4419e1e579ab4c2ae3c776d293d397d575df181e6cae0a4ada5d67ecea171cca3288d57c7bbdaee3befe745fb7d634f70386d873b90c4d6c6596bb65af68f9e5121e67ebf0d89d3c909ceedfb32ce9575a7758ff080724e1ab5d5f43074ecb53a479af21ed03d7b6899c36631c0166f9d47e5e1d4528a5d3d3f744029c4b1c190cbfbad06f5f83f7ad0429fa9a2719c56ffe3783460e166de2d8>`;
+                } else if (variant === 2) {
+                    wireGuardText += `
+I1 = <b 0xc7000000010809a1ed4edbbe7615000044d017a61a0d774f04290f119e701ef0035df2b0ed571b0b575e6a07246b856eb6ec036fef07f1e07b861251ad737abeb67e64be714c1dcd865312b1b6c35c089c997aeb5c18f808696fe97289513945d84ca846467603e94e44224877f2c1d3261e4ac18740be4bd064369c94fc08978d99b54bf615250998639010c1284248e1d73004b81fcb20b559d8a17eced7eab3964b5b88ca7a3b8579fc8c1c934189e77143b4ac434138114b1048651b56545b87acbef0952763538f3ddeb37cfc6d58b4881c3b719d7ff78f6ee1324a2914a32381c05a64c700466d280be007253bb030d179c4f1b3dc221e1974e2ee6d6e2b9e8d709159b5ef22e1783dbba845c20ca1c83b066c73835920ad70b806df0aee0351e3fc9ab1e42e8b2a30fe235ff0612eee19744949cecee0463b76514ad90c1f7ceaa557c18586ab561d49482e73c85d0143785da14a441bf82f78783b61cccd44aecb1947516e79b5ca5a6b3a8aed6040fae0eeabdc55a88dc19ade832d99fca90c7a629cacc07192d7e47e3c6a271b95b0ea3392562a06a1cab79f40ea92916ebee197b7b5f14b251824e1ed20ff2ca80b1f03a43e45157589bc61b978e97851025b3b7ccc17d291e1cb60fe48a5c26829dce11dd23c2e73265a9ebf8617c985e4fee4681e863f990061f4dea465a7d2524bd0edcf4b48d4b8f25fc359b15babd2637284a4774077dca60091f1a781cfee1bef9713dd5943a579d7470bc5970542fbb27fdf77880a8d8751b1f642c7a3f019a05ab94bf63d3525ef34e9290b5c8d477f2714e6d6e3e4d35c1983f5e16fda57fcdf071b513f8f088dbe8d5a97577d17a5383a496c3f313adfdd47c962bbaebd6aa13b46439eb742622c29ca067db0ec1853064c3cbbffe0a215a19fce47d49703ed58ebbd89721172d256d1cf30188106fb2f863186511401fad54d087aa2fb3d1b85768db386bd7102e8060ac157bac011acdcdae2799b9aee1467c3424013455bd028fcaacdc3c77d28ea199967d617ea7d0d0815f3cc407934a76d1293dccba210d1709a13e5dd67c9ba47cd113f5bdd740358eff13164159fd09bc2f7ec6cfa64d9df7e2e2f88706b0ff3a92ccf6f078456cfe0bdd89292cfe2680badc1eac9f7d36efe8eb6912c7b164508d13e6c0911c15f73c233cbe4fc70ff2ade1e1be4bbb738e0939159e2078a9438f05b756a003371f4861481c38f1cdd2d7b06deb62869e9fe79a8abaa920646fa2e8fa28f0d80c136376c7b56046bae4c05c0cdf64efb8c47bbfc5a1a4c0b045061ef0d71618e0d206a1d7f245fd5c03191b152673ba8dff8e1b8de7c50234a93cba91e3888adb228cc02beded4b1c0946797d3ef02dec2edb6ad0ac21f89f4be364c317da7c22440e9f358d512203f4b7ab20388af68b8915d0152db2c8a0687bfaea870f7529bb92a22b35bd79bc6d490591406346ecd78342ee3563c4883a8251679691c2d4e963397e24653520795511b018915374c954bddb940a9d7a16d1c8bd798fc7dbfb0599a7074e13f87e14efa8d511bb2579ec029b1bda18fe971b30fbe19e986ff2686a69bf3f1bb929de93ae70345ebca998b11e0a2b41890cba628d8f6e7c4e94790735e5299b4ff07cd3080f7d53c9cbe1911d2cd5925b3213e033c272506a87886cf761a283a779564d3241e3c28f632e166b5d756e1786ce077614c4444e3f2aed5decb3613b925ea3e558c21d4faf8ba54edd0f3a5d4>`;
+                } else if (variant === 3) {
+                    wireGuardText += `
 I1 = <b 0x494e56495445207369703a626f624062696c6f78692e636f6d205349502f322e300d0a5669613a205349502f322e302f55445020706333332e61746c616e74612e636f6d3b6272616e63683d7a39684734624b3737366173646864730d0a4d61782d466f7277617264733a2037300d0a546f3a20426f62203c7369703a626f624062696c6f78692e636f6d3e0d0a46726f6d3a20416c696365203c7369703a616c6963654061746c616e74612e636f6d3e3b7461673d313932383330313737340d0a43616c6c2d49443a20613834623463373665363637313040706333332e61746c616e74612e636f6d0d0a435365713a2033313431353920494e564954450d0a436f6e746163743a203c7369703a616c69636540706333332e61746c616e74612e636f6d3e0d0a436f6e74656e742d547970653a206170706c69636174696f6e2f7364700d0a436f6e74656e742d4c656e6774683a20300d0a0d0a>
-I2 = <b 0x5349502f322e302031303020547279696e670d0a5669613a205349502f322e302f55445020706333332e61746c616e74612e636f6d3b6272616e63683d7a39684734624b3737366173646864730d0a546f3a20426f62203c7369703a626f624062696c6f78692e636f6d3e0d0a46726f6d3a20416c696365203c7369703a616c6963654061746c616e74612e636f6d3e3b7461673d313932383330313737340d0a43616c6c2d49443a20613834623463373665363637313040706333332e61746c616e74612e636f6d0d0a435365713a2033313431353920494e564954450d0a436f6e74656e742d4c656e6774683a20300d0a0d0a>
+I2 = <b 0x5349502f322e302031303020547279696e670d0a5669613a205349502f322e302f55445020706333332e61746c616e74612e636f6d3b6272616e63683d7a39684734624b3737366173646864730d0a546f3a20426f62203c7369703a626f624062696c6f78692e636f6d3e0d0a46726f6d3a20416c696365203c7369703a616c6963654061746c616e74612e636f6d3e3b7461673d313932383330313737340d0a43616c6c2d49443a20613834623463373665363637313040706333332e61746c616e74612e636f6d0d0a435365713a2033313431353920494e564954450d0a436f6e74656e742d4c656e6774683a20300d0a0d0a>`;
+                }
+
+                wireGuardText += `
 
 [Peer]
 PublicKey = ${accountData.config.peers[0].public_key}
 AllowedIPs = ${allowedIPs}
 Endpoint = ${randomEndpoint}`;
-            downloadConfig(`WARPm3_${randomNumber}.conf`, wireGuardText);
-            showPopup('Конфигурация успешно скачана');
-        } catch (error) {
-            console.error(error);
-            showPopup(`Ошибка: ${error.message}`, 'error');
-        } finally {
-            button.disabled = false;
-            button.classList.remove("button--loading");
-        }
-    });
 
-    // Clash
-    Clash?.addEventListener('click', async () => {
-        const button = document.getElementById('generateButton5');
-        if (!button) return;
-        const randomNumber = Math.floor(Math.random() * (99 - 10 + 1)) + 10;
-        button.disabled = true;
-        button.classList.add("button--loading");
-        try {
-            const { publicKey, privateKey } = await fetchKeys();
-            const installId = generateRandomString(22);
-            const fcmToken = `${installId}:APA91b${generateRandomString(134)}`;
-            const accountData = await fetchAccount(publicKey, installId, fcmToken);
-            const reserved = generateReserved(accountData.config.client_id);
-            const wireGuardText = `warp-common: &warp-common
-  type: wireguard
-  ip: ${accountData.config.interface.addresses.v4}
-  ipv6: ${accountData.config.interface.addresses.v6}
-  private-key: ${privateKey}
-  public-key: ${accountData.config.peers[0].public_key}
-  allowed-ips: ['0.0.0.0/0']
-  reserved: [${reserved}]
-  udp: true
-  mtu: 1280
-  remote-dns-resolve: true
-  dns: [1.1.1.1, 1.0.0.1, 2606:4700:4700::1111, 2606:4700:4700::1001]
-  server: 162.159.192.1
-  port: 4500
-   
-proxies:
-- name: "AWG 1.5 (1 Вариант)"
-  <<: *warp-common
-  amnezia-wg-option:
-   jc: 120
-   jmin: 23
-   jmax: 911
-   s1: 0
-   s2: 0
-   h1: 1
-   h2: 2
-   h4: 3
-   h3: 4  
-   i1: <b 0xce000000010897a297ecc34cd6dd000044d0ec2e2e1ea2991f467ace4222129b5a098823784694b4897b9986ae0b7280135fa85e196d9ad980b150122129ce2a9379531b0fd3e871ca5fdb883c369832f730e272d7b8b74f393f9f0fa43f11e510ecb2219a52984410c204cf875585340c62238e14ad04dff382f2c200e0ee22fe743b9c6b8b043121c5710ec289f471c91ee414fca8b8be8419ae8ce7ffc53837f6ade262891895f3f4cecd31bc93ac5599e18e4f01b472362b8056c3172b513051f8322d1062997ef4a383b01706598d08d48c221d30e74c7ce000cdad36b706b1bf9b0607c32ec4b3203a4ee21ab64df336212b9758280803fcab14933b0e7ee1e04a7becce3e2633f4852585c567894a5f9efe9706a151b615856647e8b7dba69ab357b3982f554549bef9256111b2d67afde0b496f16962d4957ff654232aa9e845b61463908309cfd9de0a6abf5f425f577d7e5f6440652aa8da5f73588e82e9470f3b21b27b28c649506ae1a7f5f15b876f56abc4615f49911549b9bb39dd804fde182bd2dcec0c33bad9b138ca07d4a4a1650a2c2686acea05727e2a78962a840ae428f55627516e73c83dd8893b02358e81b524b4d99fda6df52b3a8d7a5291326e7ac9d773c5b43b8444554ef5aea104a738ed650aa979674bbed38da58ac29d87c29d387d80b526065baeb073ce65f075ccb56e47533aef357dceaa8293a523c5f6f790be90e4731123d3c6152a70576e90b4ab5bc5ead01576c68ab633ff7d36dcde2a0b2c68897e1acfc4d6483aaaeb635dd63c96b2b6a7a2bfe042f6aed82e5363aa850aace12ee3b1a93f30d8ab9537df483152a5527faca21efc9981b304f11fc95336f5b9637b174c5a0659e2b22e159a9fed4b8e93047371175b1d6d9cc8ab745f3b2281537d1c75fb9451871864efa5d184c38c185fd203de206751b92620f7c369e031d2041e152040920ac2c5ab5340bfc9d0561176abf10a147287ea90758575ac6a9f5ac9f390d0d5b23ee12af583383d994e22c0cf42383834bcd3ada1b3825a0664d8f3fb678261d57601ddf94a8a68a7c273a18c08aa99c7ad8c6c42eab67718843597ec9930457359dfdfbce024afc2dcf9348579a57d8d3490b2fa99f278f1c37d87dad9b221acd575192ffae1784f8e60ec7cee4068b6b988f0433d96d6a1b1865f4e155e9fe020279f434f3bf1bd117b717b92f6cd1cc9bea7d45978bcc3f24bda631a36910110a6ec06da35f8966c9279d130347594f13e9e07514fa370754d1424c0a1545c5070ef9fb2acd14233e8a50bfc5978b5bdf8bc1714731f798d21e2004117c61f2989dd44f0cf027b27d4019e81ed4b5c31db347c4a3a4d85048d7093cf16753d7b0d15e078f5c7a5205dc2f87e330a1f716738dce1c6180e9d02869b5546f1c4d2748f8c90d9693cba4e0079297d22fd61402dea32ff0eb69ebd65a5d0b687d87e3a8b2c42b648aa723c7c7daf37abcc4bb85caea2ee8f55bec20e913b3324ab8f5c3304f820d42ad1b9f2ffc1a3af9927136b4419e1e579ab4c2ae3c776d293d397d575df181e6cae0a4ada5d67ecea171cca3288d57c7bbdaee3befe745fb7d634f70386d873b90c4d6c6596bb65af68f9e5121e67ebf0d89d3c909ceedfb32ce9575a7758ff080724e1ab5d5f43074ecb53a479af21ed03d7b6899c36631c0166f9d47e5e1d4528a5d3d3f744029c4b1c190cbfbad06f5f83f7ad0429fa9a2719c56ffe3783460e166de2d8>
-- name: "AWG 1.5 (2 Вариант)"
-  <<: *warp-common
-  amnezia-wg-option:
-   jc: 120
-   jmin: 23
-   jmax: 911
-   s1: 0
-   s2: 0
-   h1: 1
-   h2: 2
-   h4: 3
-   h3: 4
-   i1: <b 0xc7000000010809a1ed4edbbe7615000044d017a61a0d774f04290f119e701ef0035df2b0ed571b0b575e6a07246b856eb6ec036fef07f1e07b861251ad737abeb67e64be714c1dcd865312b1b6c35c089c997aeb5c18f808696fe97289513945d84ca846467603e94e44224877f2c1d3261e4ac18740be4bd064369c94fc08978d99b54bf615250998639010c1284248e1d73004b81fcb20b559d8a17eced7eab3964b5b88ca7a3b8579fc8c1c934189e77143b4ac434138114b1048651b56545b87acbef0952763538f3ddeb37cfc6d58b4881c3b719d7ff78f6ee1324a2914a32381c05a64c700466d280be007253bb030d179c4f1b3dc221e1974e2ee6d6e2b9e8d709159b5ef22e1783dbba845c20ca1c83b066c73835920ad70b806df0aee0351e3fc9ab1e42e8b2a30fe235ff0612eee19744949cecee0463b76514ad90c1f7ceaa557c18586ab561d49482e73c85d0143785da14a441bf82f78783b61cccd44aecb1947516e79b5ca5a6b3a8aed6040fae0eeabdc55a88dc19ade832d99fca90c7a629cacc07192d7e47e3c6a271b95b0ea3392562a06a1cab79f40ea92916ebee197b7b5f14b251824e1ed20ff2ca80b1f03a43e45157589bc61b978e97851025b3b7ccc17d291e1cb60fe48a5c26829dce11dd23c2e73265a9ebf8617c985e4fee4681e863f990061f4dea465a7d2524bd0edcf4b48d4b8f25fc359b15babd2637284a4774077dca60091f1a781cfee1bef9713dd5943a579d7470bc5970542fbb27fdf77880a8d8751b1f642c7a3f019a05ab94bf63d3525ef34e9290b5c8d477f2714e6d6e3e4d35c1983f5e16fda57fcdf071b513f8f088dbe8d5a97577d17a5383a496c3f313adfdd47c962bbaebd6aa13b46439eb742622c29ca067db0ec1853064c3cbbffe0a215a19fce47d49703ed58ebbd89721172d256d1cf30188106fb2f863186511401fad54d087aa2fb3d1b85768db386bd7102e8060ac157bac011acdcdae2799b9aee1467c3424013455bd028fcaacdc3c77d28ea199967d617ea7d0d0815f3cc407934a76d1293dccba210d1709a13e5dd67c9ba47cd113f5bdd740358eff13164159fd09bc2f7ec6cfa64d9df7e2e2f88706b0ff3a92ccf6f078456cfe0bdd89292cfe2680badc1eac9f7d36efe8eb6912c7b164508d13e6c0911c15f73c233cbe4fc70ff2ade1e1be4bbb738e0939159e2078a9438f05b756a003371f4861481c38f1cdd2d7b06deb62869e9fe79a8abaa920646fa2e8fa28f0d80c136376c7b56046bae4c05c0cdf64efb8c47bbfc5a1a4c0b045061ef0d71618e0d206a1d7f245fd5c03191b152673ba8dff8e1b8de7c50234a93cba91e3888adb228cc02beded4b1c0946797d3ef02dec2edb6ad0ac21f89f4be364c317da7c22440e9f358d512203f4b7ab20388af68b8915d0152db2c8a0687bfaea870f7529bb92a22b35bd79bc6d490591406346ecd78342ee3563c4883a8251679691c2d4e963397e24653520795511b018915374c954bddb940a9d7a16d1c8bd798fc7dbfb0599a7074e13f87e14efa8d511bb2579ec029b1bda18fe971b30fbe19e986ff2686a69bf3f1bb929de93ae70345ebca998b11e0a2b41890cba628d8f6e7c4e94790735e5299b4ff07cd3080f7d53c9cbe1911d2cd5925b3213e033c272506a87886cf761a283a779564d3241e3c28f632e166b5d756e1786ce077614c4444e3f2aed5decb3613b925ea3e558c21d4faf8ba54edd0f3a5d4>
-- name: "AWG 1.5 (3 Вариант)"
-  <<: *warp-common
-  amnezia-wg-option:
-   jc: 120
-   jmin: 23
-   jmax: 911
-   s1: 0
-   s2: 0
-   h1: 1
-   h2: 2
-   h4: 3
-   h3: 4   
-   i1: <b 0x494e56495445207369703a626f624062696c6f78692e636f6d205349502f322e300d0a5669613a205349502f322e302f55445020706333332e61746c616e74612e636f6d3b6272616e63683d7a39684734624b3737366173646864730d0a4d61782d466f7277617264733a2037300d0a546f3a20426f62203c7369703a626f624062696c6f78692e636f6d3e0d0a46726f6d3a20416c696365203c7369703a616c6963654061746c616e74612e636f6d3e3b7461673d313932383330313737340d0a43616c6c2d49443a20613834623463373665363637313040706333332e61746c616e74612e636f6d0d0a435365713a2033313431353920494e564954450d0a436f6e746163743a203c7369703a616c69636540706333332e61746c616e74612e636f6d3e0d0a436f6e74656e742d547970653a206170706c69636174696f6e2f7364700d0a436f6e74656e742d4c656e6774683a20300d0a0d0a>
-   i2: <b 0x5349502f322e302031303020547279696e670d0a5669613a205349502f322e302f55445020706333332e61746c616e74612e636f6d3b6272616e63683d7a39684734624b3737366173646864730d0a546f3a20426f62203c7369703a626f624062696c6f78692e636f6d3e0d0a46726f6d3a20416c696365203c7369703a616c6963654061746c616e74612e636f6d3e3b7461673d313932383330313737340d0a43616c6c2d49443a20613834623463373665363637313040706333332e61746c616e74612e636f6d0d0a435365713a2033313431353920494e564954450d0a436f6e74656e742d4c656e6774683a20300d0a0d0a>
-   j1: <b 0xabcdef1234567890>
-   itime: 120
-  
-proxy-groups:
-- name: WARP
-  type: select
-  icon: https://www.vectorlogo.zone/logos/cloudflare/cloudflare-icon.svg
-  proxies:
-    - "AWG 1.5 (1 Вариант)"
-    - "AWG 1.5 (2 Вариант)"
-    - "AWG 1.5 (3 Вариант)"
-  url: 'http://speed.cloudflare.com/'
-  interval: 300`;
-            downloadConfig(`ClashWARP_${randomNumber}.yaml`, wireGuardText);
-            showPopup('Конфигурация успешно скачана');
-        } catch (error) {
-            console.error(error);
-            showPopup(`Ошибка: ${error.message}`, 'error');
-        } finally {
-            button.disabled = false;
-            button.classList.remove("button--loading");
-        }
-    });
+                const fileName = variant === 1 ? `WARPm1_${randomNumber}.conf` : (variant === 2 ? `WARPm2_${randomNumber}.conf` : `WARPm3_${randomNumber}.conf`);
+                downloadConfig(fileName, wireGuardText);
+                showPopup('Конфигурация успешно скачана');
+            } catch (error) {
+                console.error(error);
+                if (error.message.includes('429')) {
+                    showPopup('Слишком много запросов. Подождите 15 секунд.', 'error');
+                    blockButton(button, 15);
+                } else {
+                    showPopup(`Ошибка: ${error.message}`, 'error');
+                }
+            } finally {
+                button.classList.remove("button--loading");
+                if (!button.disabled || !error?.message?.includes('429')) {
+                    button.disabled = false;
+                }
+            }
+        };
+    };
 
-    // Throne
-    Throne?.addEventListener('click', async () => {
-        const button = document.getElementById('generateButton6');
-        if (!button) return;
-        button.disabled = true;
-        button.classList.add("button--loading");
-        try {
-            const { publicKey, privateKey } = await fetchKeys();
-            const installId = generateRandomString(22);
-            const fcmToken = `${installId}:APA91b${generateRandomString(134)}`;
-            const accountData = await fetchAccount(publicKey, installId, fcmToken);
-            const reserved = generateReserved(accountData.config.client_id).replace(/, /g, '-');
-            const privateKeyWithoutEqual = privateKey.replace(/=$/, '');
-            const wireGuardText = `wg://162.159.192.1:500?private_key=${privateKeyWithoutEqual}%3D&peer_public_key=bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo%3D&pre_shared_key=&reserved=${reserved}&persistent_keepalive=0&mtu=1280&use_system_interface=false&local_address=${accountData.config.interface.addresses.v4}/32-${accountData.config.interface.addresses.v6}/128&workers=0&enable_amnezia=true&junk_packet_count=4&junk_packet_min_size=40&junk_packet_max_size=70&init_packet_junk_size=0&response_packet_junk_size=0&init_packet_magic_header=1&response_packet_magic_header=2&underload_packet_magic_header=3&transport_packet_magic_header=4#WARP`;
-            document.getElementById('throneText').value = wireGuardText;
-            const modal2 = document.getElementById('ThroneModal');
-            modal2.style.display = "block";
-        } catch (error) {
-            console.error(error);
-            showPopup(`Ошибка: ${error.message}`, 'error');
-        } finally {
-            button.disabled = false;
-            button.classList.remove("button--loading");
-        }
-    });
-
-    // Neko
-    Neko?.addEventListener('click', async () => {
-        const button = document.getElementById('generateButton7');
-        if (!button) return;
-        const randomNumber = Math.floor(Math.random() * (99 - 10 + 1)) + 10;
-        button.disabled = true;
-        button.classList.add("button--loading");
-        try {
-            const { publicKey, privateKey } = await fetchKeys();
-            const installId = generateRandomString(22);
-            const fcmToken = `${installId}:APA91b${generateRandomString(134)}`;
-            const accountData = await fetchAccount(publicKey, installId, fcmToken);
-            const reserved = generateReserved(accountData.config.client_id);
-            const wireGuardText = `{
-"mtu": 1280,
-"reserved": [${reserved}],
-"private_key": "${privateKey}",
-"type": "wireguard",
-"local_address": ["${accountData.config.interface.addresses.v4}/32", "${accountData.config.interface.addresses.v6}/128"],
-"peer_public_key": "${accountData.config.peers[0].public_key}",
-"server": "162.159.192.1",
-"server_port": 500
-}`;
-            downloadConfig(`NekoWARP_${randomNumber}.conf`, wireGuardText);
-            showPopup('Конфигурация успешно скачана');
-        } catch (error) {
-            console.error(error);
-            showPopup(`Ошибка: ${error.message}`, 'error');
-        } finally {
-            button.disabled = false;
-            button.classList.remove("button--loading");
-        }
-    });
-
-    // Husi
-    Husi?.addEventListener('click', async () => {
-        const button = document.getElementById('generateButton8');
-        if (!button) return;
-        const randomNumber = Math.floor(Math.random() * (99 - 10 + 1)) + 10;
-        button.disabled = true;
-        button.classList.add("button--loading");
-        try {
-            const { publicKey, privateKey } = await fetchKeys();
-            const installId = generateRandomString(22);
-            const fcmToken = `${installId}:APA91b${generateRandomString(134)}`;
-            const accountData = await fetchAccount(publicKey, installId, fcmToken);
-            const reserved = generateReserved(accountData.config.client_id);
-            const wireGuardText = `{
-"type": "wireguard",
-"tag": "proxy",
-"mtu": 1280,
-"address": ["${accountData.config.interface.addresses.v4}/32", "${accountData.config.interface.addresses.v6}/128"],
-"private_key": "${privateKey}",
-"listen_port": 0,
-"peers": [
-{
-"address": "162.159.192.1",
-"port": 500,
-"public_key": "${accountData.config.peers[0].public_key}",
-"pre_shared_key": "",
-"allowed_ips": [
-"0.0.0.0/0",
-"::/0"
-],
-"persistent_keepalive_interval": 600,
-"reserved": "${reserved}"
-}
-],
-"detour": "direct"
-}`;
-            downloadConfig(`HusiWARP_${randomNumber}.conf`, wireGuardText);
-            showPopup('Конфигурация успешно скачана');
-        } catch (error) {
-            console.error(error);
-            showPopup(`Ошибка: ${error.message}`, 'error');
-        } finally {
-            button.disabled = false;
-            button.classList.remove("button--loading");
-        }
-    });
-
-    // Karing
-    Karing?.addEventListener('click', async () => {
-        const button = document.getElementById('generateButton9');
-        if (!button) return;
-        const randomNumber = Math.floor(Math.random() * (99 - 10 + 1)) + 10;
-        button.disabled = true;
-        button.classList.add("button--loading");
-        try {
-            const { publicKey, privateKey } = await fetchKeys();
-            const installId = generateRandomString(22);
-            const fcmToken = `${installId}:APA91b${generateRandomString(134)}`;
-            const accountData = await fetchAccount(publicKey, installId, fcmToken);
-            const reserved = generateReserved(accountData.config.client_id);
-            const wireGuardText = `{
-  "outbounds":   [
-{
-"tag": "WARP",
-"reserved": [${reserved}],
-"mtu": 1280,
-"fake_packets": "5-10",
-"fake_packets_size": "40-100",
-"fake_packets_delay": "20-250",
-"fake_packets_mode": "m4",
-"private_key": "${privateKey}",
-"type": "wireguard",
-"local_address": ["${accountData.config.interface.addresses.v4}/32", "${accountData.config.interface.addresses.v6}/128"],
-"peer_public_key": "${accountData.config.peers[0].public_key}",
-"server": "162.159.192.1",
-"server_port": 500
-}
-  ]
-}`;
-            downloadConfig(`KaringWARP_${randomNumber}.conf`, wireGuardText);
-            showPopup('Конфигурация успешно скачана');
-        } catch (error) {
-            console.error(error);
-            showPopup(`Ошибка: ${error.message}`, 'error');
-        } finally {
-            button.disabled = false;
-            button.classList.remove("button--loading");
-        }
-    });
-
-    // WireSock
-    WireSock?.addEventListener('click', async () => {
-        const button = document.getElementById('generateButton10');
-        if (!button) return;
-        const randomNumber = Math.floor(Math.random() * (99 - 10 + 1)) + 10;
-        button.disabled = true;
-        button.classList.add("button--loading");
-        try {
-            const { publicKey, privateKey } = await fetchKeys();
-            const installId = generateRandomString(22);
-            const fcmToken = `${installId}:APA91b${generateRandomString(134)}`;
-            const accountData = await fetchAccount(publicKey, installId, fcmToken);
-            const selectedDNS = getSelectedDNS();
-            const allowedIPs = getSelectedSites();
-            const randomEndpoint = generateRandomEndpoint();
-            const domains = ['ozon.ru', 'apteka.ru', 'mail.ru', 'psbank.ru', 'lenta.ru', 'www.pochta.ru', 'rzd.ru', 'rutube.ru', 'gosuslugi.ru'];
-            const randomDomain = domains[Math.floor(Math.random() * domains.length)];
-            const wireGuardText = `[Interface]
-PrivateKey = ${privateKey}
-Address = ${accountData.config.interface.addresses.v4}, ${accountData.config.interface.addresses.v6}
-DNS = ${selectedDNS}
-MTU = 1280
-S1 = 0
-S2 = 0
-Jc = 4
-Jmin = 40
-Jmax = 70
-H1 = 1
-H2 = 2
-H3 = 3
-H4 = 4
-
-# Protocol masking
-
-Id = ${randomDomain}
-Ip = quic
-Ib = firefox
-
-[Peer]
-PublicKey = ${accountData.config.peers[0].public_key}
-AllowedIPs = ${allowedIPs}
-Endpoint = ${randomEndpoint}`;
-            downloadConfig(`WARPw_${randomNumber}.conf`, wireGuardText);
-            showPopup('Конфигурация успешно скачана');
-        } catch (error) {
-            console.error(error);
-            showPopup(`Ошибка: ${error.message}`, 'error');
-        } finally {
-            button.disabled = false;
-            button.classList.remove("button--loading");
-        }
-    });
+    // Подключаем обработчики
+    AWGm1?.addEventListener('click', createAWGHandler(1)('generateButton2'));
+    AWGm2?.addEventListener('click', createAWGHandler(2)('generateButton3'));
+    AWGm3?.addEventListener('click', createAWGHandler(3)('generateButton4'));
 
     document.getElementById('telegramButton').onclick = function() {
         window.location.href = 'https://t.me/warp_1_1_1_1';
@@ -1147,35 +682,23 @@ Endpoint = ${randomEndpoint}`;
         else return selectedSites.map(site => site.ip).join(', ');
     }
 
+    // === Модальные окна ===
     const modal = document.getElementById("infoModal");
     const infoBtn = document.getElementById("infoButton");
-    const infoBtn2 = document.getElementById("infoButton2");
     const span = document.getElementsByClassName("close")[0];
-    const span1 = document.getElementById("close2");
-    const modal2 = document.getElementById("ThroneModal");
 
     function lockBodyScroll() { document.body.style.overflow = 'hidden'; }
     function unlockBodyScroll() { document.body.style.overflow = ''; }
 
     function openModal() { modal.style.display = "block"; lockBodyScroll(); }
     if (infoBtn) infoBtn.onclick = openModal;
-    if (infoBtn2) infoBtn2.onclick = openModal;
-
-    if (span) span.onclick = function() { modal.style.display = "none"; modal2.style.display = "none"; unlockBodyScroll(); };
-    if (span1) span1.onclick = function() { modal.style.display = "none"; modal2.style.display = "none"; unlockBodyScroll(); };
+    if (span) span.onclick = function() { modal.style.display = "none"; unlockBodyScroll(); };
 
     window.onclick = function(event) {
         if (event.target == modal) { modal.style.display = "none"; unlockBodyScroll(); }
-        if (event.target == modal2) { modal2.style.display = "none"; unlockBodyScroll(); }
     };
 
-    document.getElementById('copyThroneButton')?.addEventListener('click', function() {
-        const throneText = document.getElementById('throneText');
-        throneText.select();
-        document.execCommand('copy');
-        showPopup('Конфигурация скопирована!');
-    });
-
+    // === Блокировка настроек при выборе блокирующего DNS ===
     function updateToggleState() {
         const toggleCheckbox = document.getElementById('rules');
         const siteCheckboxes = document.querySelectorAll('.Sites .payment-radio');
