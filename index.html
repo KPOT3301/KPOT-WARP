@@ -424,7 +424,7 @@
 </div>
 
 <script>
-    // === ВЕСЬ JS КОД (оригинальный, но с удалением ссылок на отсутствующие изображения) ===
+    // === УЛУЧШЕННАЯ ВЕРСИЯ С ПОВТОРНЫМИ ПОПЫТКАМИ, ТАЙМАУТАМИ И ДЕТАЛЬНЫМИ ОШИБКАМИ ===
     const AWG = document.querySelector('.get-btn1');
     const AWGm1 = document.querySelector('.get-btn2');
     const AWGm2 = document.querySelector('.get-btn3');
@@ -483,7 +483,8 @@
         return options[Math.floor(Math.random() * options.length)];
     }
 
-    const fetchWithTimeout = async (url, options = {}, timeout = 3000) => {
+    // Улучшенный fetch с увеличенным таймаутом
+    const fetchWithTimeout = async (url, options = {}, timeout = 8000) => {
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);
         try {
@@ -492,8 +493,20 @@
             return response;
         } catch (error) {
             clearTimeout(id);
-            if (error.name === 'AbortError') throw new Error(`Request timeout for ${url}`);
+            if (error.name === 'AbortError') throw new Error(`Превышен таймаут (${timeout}мс) для ${url}`);
             throw error;
+        }
+    };
+
+    // Функция повторных попыток
+    const retryFetch = async (fn, retries = 2, delay = 1000) => {
+        for (let i = 0; i <= retries; i++) {
+            try {
+                return await fn();
+            } catch (error) {
+                if (i === retries) throw error;
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
         }
     };
 
@@ -510,20 +523,26 @@
 
     const fetchKeys = async (primaryOnly = false) => {
         if (sessionCache.keys) return sessionCache.keys;
-        const endpoints = ['https://keygen.warp-generator.workers.dev', 'https://warp-generation.vercel.app/keys'];
+        const endpoints = [
+            'https://keygen.warp-generator.workers.dev',
+            'https://warp-generation.vercel.app/keys',
+            'https://warp-key-generator.vercel.app/api/keys'
+        ];
         let lastError;
         for (let i = 0; i < endpoints.length; i++) {
             try {
-                const response = await fetchWithTimeout(endpoints[i]);
-                if (!response.ok) throw new Error(`Failed to fetch keys from ${i}: ${response.status}`);
+                const response = await retryFetch(() => fetchWithTimeout(endpoints[i]));
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const data = await response.text();
                 const keys = {
                     publicKey: extractKey(data, 'PublicKey'),
                     privateKey: extractKey(data, 'PrivateKey'),
                 };
+                if (!keys.publicKey || !keys.privateKey) throw new Error('Неверный формат ключей');
                 sessionCache.keys = keys;
                 return keys;
             } catch (error) {
+                console.warn(`Endpoint ${endpoints[i]} failed:`, error.message);
                 lastError = error;
                 if (primaryOnly) break;
                 if (i === endpoints.length - 1) throw lastError;
@@ -533,7 +552,9 @@
     };
 
     const fetchAccount = async (publicKey, installId, fcmToken, primaryOnly = false) => {
-        if (sessionCache.accountData && sessionCache.keys && sessionCache.keys.publicKey === publicKey) return sessionCache.accountData;
+        if (sessionCache.accountData && sessionCache.keys && sessionCache.keys.publicKey === publicKey) {
+            return sessionCache.accountData;
+        }
         const endpoints = [
             'https://www.warp-generator.workers.dev/wg',
             'https://warp.sub-aggregator.workers.dev/wg',
@@ -542,7 +563,7 @@
         let lastError;
         for (let i = 0; i < endpoints.length; i++) {
             try {
-                const response = await fetchWithTimeout(endpoints[i], {
+                const response = await retryFetch(() => fetchWithTimeout(endpoints[i], {
                     method: 'POST',
                     headers: {
                         'User-Agent': 'okhttp/3.12.1',
@@ -558,13 +579,18 @@
                         serial_number: installId,
                         locale: 'de_DE',
                     }),
-                });
-                if (!response.ok) throw new Error(`Failed to fetch account from ${i}: ${response.status}`);
+                }));
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const accountData = await response.json();
+                // Проверка наличия необходимых полей
+                if (!accountData?.config?.interface?.addresses?.v4 || !accountData?.config?.peers?.[0]?.public_key) {
+                    throw new Error('Неполные данные аккаунта');
+                }
                 sessionCache.accountData = accountData;
                 sessionCache.fcmToken = fcmToken;
                 return accountData;
             } catch (error) {
+                console.warn(`Account endpoint ${endpoints[i]} failed:`, error.message);
                 lastError = error;
                 if (primaryOnly) break;
                 if (i === endpoints.length - 1) throw lastError;
@@ -583,7 +609,7 @@
         popup.textContent = message;
         if (type === 'error') popup.style.backgroundColor = '#d32f2f';
         document.body.appendChild(popup);
-        setTimeout(() => { if (popup.parentNode) popup.parentNode.removeChild(popup); }, 2500);
+        setTimeout(() => { if (popup.parentNode) popup.parentNode.removeChild(popup); }, 3500);
     };
 
     const downloadConfig = (fileName, content) => {
@@ -596,6 +622,7 @@
         document.body.removeChild(element);
     };
 
+    // === ВСЕ ОБРАБОТЧИКИ (с детализированными ошибками) ===
     // AWG
     AWG?.addEventListener('click', async () => {
         const button = document.getElementById('generateButton1');
@@ -631,10 +658,10 @@ PublicKey = ${accountData.config.peers[0].public_key}
 AllowedIPs = ${allowedIPs}
 Endpoint = ${randomEndpoint}`;
             downloadConfig(`WARPr_${randomNumber}.conf`, wireGuardText);
-            showPopup('Скачивание конфигурации');
+            showPopup('Конфигурация успешно скачана');
         } catch (error) {
             console.error(error);
-            showPopup('Failed to generate config. Please try again.', 'error');
+            showPopup(`Ошибка: ${error.message}`, 'error');
         } finally {
             button.disabled = false;
             button.classList.remove("button--loading");
@@ -677,10 +704,10 @@ PublicKey = ${accountData.config.peers[0].public_key}
 AllowedIPs = ${allowedIPs}
 Endpoint = ${randomEndpoint}`;
             downloadConfig(`WARPm1_${randomNumber}.conf`, wireGuardText);
-            showPopup('Скачивание конфигурации');
+            showPopup('Конфигурация успешно скачана');
         } catch (error) {
             console.error(error);
-            showPopup('Failed to generate config. Please try again.', 'error');
+            showPopup(`Ошибка: ${error.message}`, 'error');
         } finally {
             button.disabled = false;
             button.classList.remove("button--loading");
@@ -723,10 +750,10 @@ PublicKey = ${accountData.config.peers[0].public_key}
 AllowedIPs = ${allowedIPs}
 Endpoint = ${randomEndpoint}`;
             downloadConfig(`WARPm2_${randomNumber}.conf`, wireGuardText);
-            showPopup('Скачивание конфигурации');
+            showPopup('Конфигурация успешно скачана');
         } catch (error) {
             console.error(error);
-            showPopup('Failed to generate config. Please try again.', 'error');
+            showPopup(`Ошибка: ${error.message}`, 'error');
         } finally {
             button.disabled = false;
             button.classList.remove("button--loading");
@@ -770,10 +797,10 @@ PublicKey = ${accountData.config.peers[0].public_key}
 AllowedIPs = ${allowedIPs}
 Endpoint = ${randomEndpoint}`;
             downloadConfig(`WARPm3_${randomNumber}.conf`, wireGuardText);
-            showPopup('Скачивание конфигурации');
+            showPopup('Конфигурация успешно скачана');
         } catch (error) {
             console.error(error);
-            showPopup('Failed to generate config. Please try again.', 'error');
+            showPopup(`Ошибка: ${error.message}`, 'error');
         } finally {
             button.disabled = false;
             button.classList.remove("button--loading");
@@ -863,10 +890,10 @@ proxy-groups:
   url: 'http://speed.cloudflare.com/'
   interval: 300`;
             downloadConfig(`ClashWARP_${randomNumber}.yaml`, wireGuardText);
-            showPopup('Скачивание конфигурации');
+            showPopup('Конфигурация успешно скачана');
         } catch (error) {
             console.error(error);
-            showPopup('Failed to generate config. Please try again.', 'error');
+            showPopup(`Ошибка: ${error.message}`, 'error');
         } finally {
             button.disabled = false;
             button.classList.remove("button--loading");
@@ -892,7 +919,7 @@ proxy-groups:
             modal2.style.display = "block";
         } catch (error) {
             console.error(error);
-            showPopup('Failed to generate config. Please try again.', 'error');
+            showPopup(`Ошибка: ${error.message}`, 'error');
         } finally {
             button.disabled = false;
             button.classList.remove("button--loading");
@@ -923,10 +950,10 @@ proxy-groups:
 "server_port": 500
 }`;
             downloadConfig(`NekoWARP_${randomNumber}.conf`, wireGuardText);
-            showPopup('Скачивание конфигурации');
+            showPopup('Конфигурация успешно скачана');
         } catch (error) {
             console.error(error);
-            showPopup('Failed to generate config. Please try again.', 'error');
+            showPopup(`Ошибка: ${error.message}`, 'error');
         } finally {
             button.disabled = false;
             button.classList.remove("button--loading");
@@ -970,10 +997,10 @@ proxy-groups:
 "detour": "direct"
 }`;
             downloadConfig(`HusiWARP_${randomNumber}.conf`, wireGuardText);
-            showPopup('Скачивание конфигурации');
+            showPopup('Конфигурация успешно скачана');
         } catch (error) {
             console.error(error);
-            showPopup('Failed to generate config. Please try again.', 'error');
+            showPopup(`Ошибка: ${error.message}`, 'error');
         } finally {
             button.disabled = false;
             button.classList.remove("button--loading");
@@ -1013,10 +1040,10 @@ proxy-groups:
   ]
 }`;
             downloadConfig(`KaringWARP_${randomNumber}.conf`, wireGuardText);
-            showPopup('Скачивание конфигурации');
+            showPopup('Конфигурация успешно скачана');
         } catch (error) {
             console.error(error);
-            showPopup('Failed to generate config. Please try again.', 'error');
+            showPopup(`Ошибка: ${error.message}`, 'error');
         } finally {
             button.disabled = false;
             button.classList.remove("button--loading");
@@ -1066,10 +1093,10 @@ PublicKey = ${accountData.config.peers[0].public_key}
 AllowedIPs = ${allowedIPs}
 Endpoint = ${randomEndpoint}`;
             downloadConfig(`WARPw_${randomNumber}.conf`, wireGuardText);
-            showPopup('Скачивание конфигурации');
+            showPopup('Конфигурация успешно скачана');
         } catch (error) {
             console.error(error);
-            showPopup('Failed to generate config. Please try again.', 'error');
+            showPopup(`Ошибка: ${error.message}`, 'error');
         } finally {
             button.disabled = false;
             button.classList.remove("button--loading");
