@@ -126,22 +126,7 @@
             from { transform: rotate(0turn); }
             to { transform: rotate(1turn); }
         }
-        #telegramButton, #promoButton {
-            margin-top: 12px;
-            background: #1f8b4c;
-        }
-        #promoButton {
-            background: #2c2f36;
-            border: 1px solid #A40059;
-            color: #A40059;
-        }
-        #info1 {
-            text-align: center;
-            font-size: 12px;
-            color: #6c6f78;
-            margin-top: 30px;
-        }
-        .modal, .modal2 {
+        .modal {
             display: none;
             position: fixed;
             z-index: 1000;
@@ -153,7 +138,7 @@
             background-color: rgba(0,0,0,0.7);
             backdrop-filter: blur(4px);
         }
-        .modal-content, .modal-content2 {
+        .modal-content {
             background-color: #1a1c22;
             margin: 5% auto;
             padding: 24px;
@@ -306,9 +291,6 @@
             <button id="generateButton4" class="get-btn4"><span class="button__text">AWG 1.5 (3 вариант)</span></button>
         </div>
     </div>
-    <button id="telegramButton"><span class="button__text">📱 Telegram</span></button>
-    <button id="promoButton" class="glow-on-hover"><span class="button__text">✨ Amnezia Premium</span></button>
-    <div id="info1">Сделано на основе warp.llimonix.dev</div>
 </div>
 
 <div id="infoModal" class="modal">
@@ -408,7 +390,6 @@
         return 'def';
     }
 
-    // Улучшенный fetch с увеличенным таймаутом
     const fetchWithTimeout = async (url, options = {}, timeout = 10000) => {
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);
@@ -423,7 +404,6 @@
         }
     };
 
-    // Функция повторных попыток с экспоненциальной задержкой
     const retryFetch = async (fn, retries = 3, baseDelay = 1000) => {
         for (let i = 0; i <= retries; i++) {
             try {
@@ -553,7 +533,6 @@
         document.body.removeChild(element);
     };
 
-    // Блокировка кнопки на 15 секунд при 429
     const blockButton = (button, seconds = 15) => {
         if (!button) return;
         button.disabled = true;
@@ -562,7 +541,6 @@
         }, seconds * 1000);
     };
 
-    // Общий обработчик для AWG вариантов
     const createAWGHandler = (variant) => {
         return async (buttonId) => {
             const button = document.getElementById(buttonId);
@@ -637,13 +615,6 @@ Endpoint = ${randomEndpoint}`;
     AWGm1?.addEventListener('click', createAWGHandler(1)('generateButton2'));
     AWGm2?.addEventListener('click', createAWGHandler(2)('generateButton3'));
     AWGm3?.addEventListener('click', createAWGHandler(3)('generateButton4'));
-
-    document.getElementById('telegramButton').onclick = function() {
-        window.location.href = 'https://t.me/warp_1_1_1_1';
-    }
-    document.getElementById('promoButton').onclick = function() {
-        window.location.href = 'https://storage.googleapis.com/amnezia/amnezia.org?m-path=premium&arf=VG755WBZDBAPGGYM';
-    }
 
     function getSelectedDNS() {
         if (document.getElementById('cf').checked) return "1.1.1.1, 1.0.0.1, 2606:4700:4700::1111, 2606:4700:4700::1001";
