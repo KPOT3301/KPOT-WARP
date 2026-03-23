@@ -334,12 +334,10 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Получаем кнопки
         const AWGm1 = document.querySelector('.get-btn2');
         const AWGm2 = document.querySelector('.get-btn3');
         const AWGm3 = document.querySelector('.get-btn4');
 
-        // Вспомогательные функции
         function generateRandomEndpoint() {
             const ports = [500, 854, 859, 864, 878, 880, 890, 891, 894, 903, 908, 928, 934, 939, 942, 943, 945, 946, 955, 968, 987, 988, 1002, 1010, 1014, 1018, 1070, 1074, 1180, 1387, 1701, 1843, 2371, 2408, 2506, 3138, 3476, 3581, 3854, 4177, 4198, 4233, 4500, 5279, 5956, 7103, 7152, 7156, 7281, 7559, 8319, 8742, 8854, 8886];
             const selectedServer = getSelectedServer();
@@ -599,12 +597,11 @@ Endpoint = ${randomEndpoint}`;
             };
         };
 
-        // Подключаем обработчики
-        if (AWGm1) AWGm1.addEventListener('click', createAWGHandler(1)('generateButton2'));
-        if (AWGm2) AWGm2.addEventListener('click', createAWGHandler(2)('generateButton3'));
-        if (AWGm3) AWGm3.addEventListener('click', createAWGHandler(3)('generateButton4'));
+        // Правильное назначение обработчиков — передаём функцию, а не вызываем её
+        if (AWGm1) AWGm1.addEventListener('click', () => createAWGHandler(1)('generateButton2'));
+        if (AWGm2) AWGm2.addEventListener('click', () => createAWGHandler(2)('generateButton3'));
+        if (AWGm3) AWGm3.addEventListener('click', () => createAWGHandler(3)('generateButton4'));
 
-        // Функции для DNS и сайтов
         function getSelectedDNS() {
             if (document.getElementById('cf').checked) return "1.1.1.1, 1.0.0.1, 2606:4700:4700::1111, 2606:4700:4700::1001";
             if (document.getElementById('malw').checked) return "84.21.189.133, 193.23.209.189, 2a12:bec4:1460:294::2, 2a01:ecc0:680:120::2";
