@@ -454,6 +454,70 @@
         return 'def';
     }
 
+    // Определение блокирующих DNS (как в начальной версии)
+    function isBlockingDNS() {
+        const selected = document.querySelector('input[name="payment"]:checked');
+        if (!selected) return false;
+        const blocking = ['comss', 'geohide', 'xbox', 'malw'];
+        return blocking.includes(selected.id);
+    }
+
+    // Сброс выбранных сайтов
+    function resetSelectedSites() {
+        const siteCheckboxes = document.querySelectorAll('#sitesContainer input');
+        siteCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+            const parent = checkbox.closest('.payment-option');
+            if (parent) parent.classList.remove('payment-option--checked');
+        });
+        updateToggleState();
+    }
+
+    // Блокировка/разблокировка серверов и сайтов, сброс при блокировке
+    function updateServerAndSitesLock() {
+        const blocking = isBlockingDNS();
+        const serverRadios = document.querySelectorAll('input[name="server"]');
+        const siteCheckboxes = document.querySelectorAll('#sitesContainer input');
+        const serverOptions = document.querySelectorAll('.server-option');
+        const siteOptions = document.querySelectorAll('#sitesContainer .payment-option');
+
+        // Блокируем/разблокируем элементы
+        serverRadios.forEach(radio => radio.disabled = blocking);
+        siteCheckboxes.forEach(checkbox => checkbox.disabled = blocking);
+
+        // Визуальное отображение блокировки
+        serverOptions.forEach(opt => opt.style.opacity = blocking ? '0.5' : '1');
+        siteOptions.forEach(opt => opt.style.opacity = blocking ? '0.5' : '1');
+
+        if (blocking) {
+            // Сбрасываем сервер на стандартный
+            const defaultServer = document.getElementById('def');
+            if (defaultServer) defaultServer.checked = true;
+            // Сбрасываем выбранные сайты
+            resetSelectedSites();
+            updateVisuals(); // обновить визуальное выделение
+        }
+    }
+
+    // Функция для обновления визуального выделения опций
+    function updateVisuals() {
+        document.querySelectorAll('.payment-option, .server-option').forEach(opt => {
+            const inp = opt.querySelector('input');
+            if (inp && inp.checked) opt.classList.add('payment-option--checked');
+            else opt.classList.remove('payment-option--checked');
+        });
+    }
+
+    // Обработчики изменения DNS
+    document.querySelectorAll('input[name="payment"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            updateServerAndSitesLock();
+        });
+    });
+
+    // Инициализация при загрузке
+    updateServerAndSitesLock();
+
     const serverNames = {
         def: { flag: "🌍", name: "СТАНДАРТ" },
         NL1: { flag: "🇳🇱", name: "НИДЕРЛАНДЫ" },
@@ -468,6 +532,9 @@
 
     function getCurrentServerInfo() {
         const serverId = getSelectedServer();
+        // Если выбран блокирующий DNS, имя файла всё равно будет определяться выбранным сервером,
+        // но сервер будет заблокирован и принудительно установлен на стандартный, так что это не имеет значения.
+        // Однако оставляем как есть, чтобы имя файла соответствовало выбранному (стандартному при блокировке)
         return serverNames[serverId] || { flag: "🌍", name: "СТАНДАРТ" };
     }
 
@@ -490,6 +557,7 @@
         return `${serverMap[selectedServer] || 'de.tribukvy.ltd'}:${port}`;
     }
 
+    // ---------- ОСНОВНЫЕ ФУНКЦИИ ГЕНЕРАЦИИ (без изменений) ----------
     const sessionCache = { keys: null, accountData: null, installId: null };
     const fetchWithTimeout = async (url, options = {}, timeout = 5000) => {
         const controller = new AbortController();
@@ -608,14 +676,7 @@
     closeSpan.onclick = () => { modal.style.display = 'none'; document.body.style.overflow = ''; };
     window.onclick = (e) => { if (e.target === modal) { modal.style.display = 'none'; document.body.style.overflow = ''; } };
 
-    // Визуальное выделение
-    function updateVisuals() {
-        document.querySelectorAll('.payment-option, .server-option').forEach(opt => {
-            const inp = opt.querySelector('input');
-            if (inp && inp.checked) opt.classList.add('payment-option--checked');
-            else opt.classList.remove('payment-option--checked');
-        });
-    }
+    // Визуальное выделение и обработчики кликов
     document.querySelectorAll('.payment-option, .server-option').forEach(el => {
         el.addEventListener('click', (e) => {
             const inp = el.querySelector('input');
@@ -623,6 +684,10 @@
             else if (inp && inp.type === 'checkbox') inp.checked = !inp.checked;
             updateVisuals();
             updateToggleState();
+            // Если изменился DNS, перепроверим блокировку
+            if (inp && inp.getAttribute('name') === 'payment') {
+                updateServerAndSitesLock();
+            }
         });
     });
     updateVisuals();
