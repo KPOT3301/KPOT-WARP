@@ -480,14 +480,27 @@
         const siteCheckboxes = document.querySelectorAll('#sitesContainer input');
         const serverOptions = document.querySelectorAll('.server-option');
         const siteOptions = document.querySelectorAll('#sitesContainer .payment-option');
+        const toggleLabel = document.querySelector('.toggle');
 
         // Блокируем/разблокируем элементы
         serverRadios.forEach(radio => radio.disabled = blocking);
         siteCheckboxes.forEach(checkbox => checkbox.disabled = blocking);
+        if (toggleLabel) {
+            const toggleCheckbox = document.getElementById('rules');
+            if (toggleCheckbox) toggleCheckbox.disabled = blocking;
+            toggleLabel.style.opacity = blocking ? '0.5' : '1';
+            toggleLabel.style.pointerEvents = blocking ? 'none' : 'auto';
+        }
 
-        // Визуальное отображение блокировки
-        serverOptions.forEach(opt => opt.style.opacity = blocking ? '0.5' : '1');
-        siteOptions.forEach(opt => opt.style.opacity = blocking ? '0.5' : '1');
+        // Визуальное отображение блокировки и отключение кликов
+        serverOptions.forEach(opt => {
+            opt.style.opacity = blocking ? '0.5' : '1';
+            opt.style.pointerEvents = blocking ? 'none' : 'auto';
+        });
+        siteOptions.forEach(opt => {
+            opt.style.opacity = blocking ? '0.5' : '1';
+            opt.style.pointerEvents = blocking ? 'none' : 'auto';
+        });
 
         if (blocking) {
             // Сбрасываем сервер на стандартный
@@ -532,9 +545,6 @@
 
     function getCurrentServerInfo() {
         const serverId = getSelectedServer();
-        // Если выбран блокирующий DNS, имя файла всё равно будет определяться выбранным сервером,
-        // но сервер будет заблокирован и принудительно установлен на стандартный, так что это не имеет значения.
-        // Однако оставляем как есть, чтобы имя файла соответствовало выбранному (стандартному при блокировке)
         return serverNames[serverId] || { flag: "🌍", name: "СТАНДАРТ" };
     }
 
