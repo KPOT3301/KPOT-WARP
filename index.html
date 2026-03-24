@@ -16,7 +16,7 @@
 
         body {
             min-height: 100vh;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            background: linear-gradient(145deg, #e0eafc 0%, #cfdef3 100%);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -25,7 +25,7 @@
             position: relative;
         }
 
-        /* Эффект свечения сзади */
+        /* Лёгкие облачные блики */
         body::before {
             content: '';
             position: fixed;
@@ -33,51 +33,52 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.05));
+            background: radial-gradient(circle at 30% 40%, rgba(255,255,240,0.4), rgba(200,210,230,0.1));
             pointer-events: none;
         }
 
-        /* Стеклянная панель */
+        /* Стеклянная панель в стиле Aero */
         .glass-panel {
             position: relative;
             max-width: 520px;
             width: 100%;
-            background: rgba(15, 25, 45, 0.45);
+            background: rgba(245, 248, 255, 0.65);
             backdrop-filter: blur(12px);
-            border-radius: 2rem;
+            border-radius: 1.5rem;
             padding: 2rem 1.8rem 2.5rem;
-            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.7);
             transition: all 0.3s ease;
         }
 
-        /* Кнопка настроек (шестерёнка) */
+        /* Кнопка настроек (шестерёнка) - светлая */
         .settings-icon {
             position: absolute;
             top: 1.2rem;
             right: 1.5rem;
             width: 40px;
             height: 40px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.5);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(4px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
         .settings-icon:hover {
-            background: rgba(245, 175, 74, 0.3);
+            background: rgba(245, 175, 74, 0.4);
             transform: rotate(20deg) scale(1.05);
             border-color: #F5AF4A;
-            box-shadow: 0 0 12px rgba(245, 175, 74, 0.4);
+            box-shadow: 0 0 12px rgba(245, 175, 74, 0.3);
         }
         .settings-icon svg {
             width: 22px;
             height: 22px;
-            stroke: #eef2ff;
+            stroke: #2c3e50;
             stroke-width: 1.8;
             fill: none;
         }
@@ -91,19 +92,19 @@
         }
         .title h1 {
             font-size: 2rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #F5AF4A, #FF7B89, #A855F7);
+            font-weight: 600;
+            background: linear-gradient(135deg, #2c3e50, #e67e22);
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
             letter-spacing: -0.5px;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-shadow: 0 1px 2px rgba(255,255,255,0.5);
         }
         .title p {
             font-size: 0.85rem;
-            color: rgba(220, 220, 255, 0.7);
+            color: #4a5568;
             margin-top: 0.4rem;
-            font-weight: 400;
+            font-weight: 500;
         }
 
         .buttons-grid {
@@ -121,13 +122,13 @@
             font-weight: 600;
             border: none;
             border-radius: 3rem;
-            background: rgba(20, 30, 50, 0.6);
+            background: rgba(255, 255, 255, 0.55);
             backdrop-filter: blur(8px);
-            color: #f0f3fa;
+            color: #2c3e50;
             cursor: pointer;
             transition: all 0.25s ease;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.7);
             overflow: hidden;
             z-index: 1;
         }
@@ -138,7 +139,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(120deg, #F5AF4A, #FF7B89, #A855F7);
+            background: linear-gradient(120deg, #F5AF4A, #FF7B89);
             opacity: 0;
             transition: opacity 0.3s;
             z-index: -1;
@@ -148,9 +149,10 @@
             opacity: 0.25;
         }
         .awg-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-            border-color: rgba(245, 175, 74, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            border-color: rgba(245, 175, 74, 0.6);
+            color: #1e2a36;
         }
         .awg-btn:active {
             transform: translateY(1px);
@@ -172,8 +174,8 @@
             left: 50%;
             margin-left: -10px;
             margin-top: -10px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top-color: #F5AF4A;
+            border: 2px solid rgba(44, 62, 80, 0.2);
+            border-top-color: #e67e22;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
@@ -181,7 +183,7 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Модальное окно (стеклянное) */
+        /* Модальное окно (стеклянное, светлое) */
         .modal {
             display: none;
             position: fixed;
@@ -190,23 +192,23 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(8px);
+            background-color: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
             align-items: center;
             justify-content: center;
         }
         .modal-content {
-            background: rgba(20, 30, 50, 0.85);
+            background: rgba(245, 248, 255, 0.9);
             backdrop-filter: blur(20px);
             margin: 5% auto;
             padding: 24px 20px;
             border-radius: 32px;
             width: 90%;
             max-width: 500px;
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
             position: relative;
-            color: #eef2ff;
+            color: #2c3e50;
         }
         .close {
             position: absolute;
@@ -214,12 +216,12 @@
             top: 12px;
             font-size: 28px;
             font-weight: bold;
-            color: #ccc;
+            color: #888;
             cursor: pointer;
             transition: 0.2s;
         }
         .close:hover {
-            color: #F5AF4A;
+            color: #e67e22;
         }
         .modal-line {
             font-weight: 600;
@@ -227,9 +229,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
+            border-bottom: 1px solid rgba(0,0,0,0.1);
             padding-bottom: 6px;
             font-size: 1rem;
+            color: #2c3e50;
         }
         .dnsinfo, .Sites {
             display: grid;
@@ -238,23 +241,24 @@
             margin-bottom: 6px;
         }
         .payment-option, .server-option {
-            background: rgba(30, 40, 60, 0.6);
+            background: rgba(255, 255, 255, 0.6);
             border-radius: 40px;
             padding: 8px 6px;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s;
-            border: 1px solid rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.8);
             font-size: 0.85rem;
+            color: #2c3e50;
             backdrop-filter: blur(4px);
         }
         .payment-option--checked, .payment-option:has(input:checked),
         .server-option--checked, .server-option:has(input:checked) {
             background: linear-gradient(120deg, #F5AF4A, #FF7B89);
-            color: #0a0f1e;
+            color: white;
             font-weight: 600;
             border-color: transparent;
-            box-shadow: 0 0 12px rgba(245, 175, 74, 0.4);
+            box-shadow: 0 0 8px rgba(245, 175, 74, 0.5);
         }
         .payment-radio, .server-radio {
             display: none;
@@ -268,44 +272,46 @@
         .toggle-switch {
             width: 48px;
             height: 26px;
-            background: #2a2f3f;
+            background: #ccc;
             border-radius: 40px;
             position: relative;
             transition: 0.2s;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(0,0,0,0.1);
         }
         .toggle-switch:before {
             content: "";
             position: absolute;
             width: 20px;
             height: 20px;
-            background: #eef2ff;
+            background: white;
             border-radius: 50%;
             top: 2px;
             left: 3px;
             transition: 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
         .toggle-checkbox:checked + .toggle-switch {
             background: #F5AF4A;
         }
         .toggle-checkbox:checked + .toggle-switch:before {
             left: 23px;
-            background: #0a0f1e;
+            background: white;
         }
         .toggle-checkbox {
             display: none;
         }
         .toggle-label {
             font-size: 0.9rem;
+            color: #2c3e50;
         }
         .info2 {
             font-size: 0.7rem;
             text-align: center;
             margin-top: 20px;
-            color: rgba(220, 220, 240, 0.6);
+            color: #4a5568;
         }
         .info2 a {
-            color: #F5AF4A;
+            color: #e67e22;
             text-decoration: none;
         }
         .modal-content .info2:last-child {
@@ -316,15 +322,15 @@
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.7);
             backdrop-filter: blur(12px);
             color: #ffd966;
             padding: 12px 24px;
             border-radius: 60px;
             font-weight: 500;
             font-size: 0.9rem;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255, 215, 100, 0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255, 215, 100, 0.4);
             z-index: 9999;
             animation: fadeUp 2.2s forwards;
             pointer-events: none;
@@ -339,7 +345,7 @@
             text-align: center;
             margin-top: 2rem;
             font-size: 0.7rem;
-            color: rgba(180, 190, 210, 0.5);
+            color: #5a6e85;
         }
         @media (max-width: 500px) {
             .dnsinfo, .Sites { grid-template-columns: repeat(2, 1fr); }
