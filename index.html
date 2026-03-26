@@ -431,6 +431,14 @@
             <label class="server-option"><div class="server-option-content">🇵🇱 Польша</div><input type="radio" name="server" id="PL" class="server-radio"></label>
             <label class="server-option"><div class="server-option-content">🇩🇪 Германия</div><input type="radio" name="server" id="DE" class="server-radio"></label>
             <label class="server-option"><div class="server-option-content">🇷🇺 Россия</div><input type="radio" name="server" id="RU" class="server-radio"></label>
+            <!-- Новые страны -->
+            <label class="server-option"><div class="server-option-content">🇺🇸 США</div><input type="radio" name="server" id="US" class="server-radio"></label>
+            <label class="server-option"><div class="server-option-content">🇨🇦 Канада</div><input type="radio" name="server" id="CA" class="server-radio"></label>
+            <label class="server-option"><div class="server-option-content">🇬🇧 Великобритания</div><input type="radio" name="server" id="GB" class="server-radio"></label>
+            <label class="server-option"><div class="server-option-content">🇫🇷 Франция</div><input type="radio" name="server" id="FR" class="server-radio"></label>
+            <label class="server-option"><div class="server-option-content">🇸🇪 Швеция</div><input type="radio" name="server" id="SE" class="server-radio"></label>
+            <label class="server-option"><div class="server-option-content">🇨🇭 Швейцария</div><input type="radio" name="server" id="CH" class="server-radio"></label>
+            <label class="server-option"><div class="server-option-content">🇸🇬 Сингапур</div><input type="radio" name="server" id="SG" class="server-radio"></label>
         </div>
     </div>
 </div>
@@ -557,7 +565,15 @@
         EE: { flag: "🇪🇪", name: "ЭСТОНИЯ" },
         PL: { flag: "🇵🇱", name: "ПОЛЬША" },
         DE: { flag: "🇩🇪", name: "ГЕРМАНИЯ" },
-        RU: { flag: "🇷🇺", name: "РОССИЯ" }
+        RU: { flag: "🇷🇺", name: "РОССИЯ" },
+        // Новые страны
+        US: { flag: "🇺🇸", name: "США" },
+        CA: { flag: "🇨🇦", name: "КАНАДА" },
+        GB: { flag: "🇬🇧", name: "ВЕЛИКОБРИТАНИЯ" },
+        FR: { flag: "🇫🇷", name: "ФРАНЦИЯ" },
+        SE: { flag: "🇸🇪", name: "ШВЕЦИЯ" },
+        CH: { flag: "🇨🇭", name: "ШВЕЙЦАРИЯ" },
+        SG: { flag: "🇸🇬", name: "СИНГАПУР" }
     };
 
     function getCurrentServerInfo() {
@@ -579,9 +595,19 @@
         const serverMap = {
             'PL': 'pl.tribukvy.ltd', 'DE': 'de.tribukvy.ltd', 'RU': 'ru0.tribukvy.ltd',
             'EE': 'ee.tribukvy.ltd', 'NL1': 'nl0.tribukvy.ltd', 'NL2': 'nl.tribukvy.ltd',
-            'FL1': 'fi0.tribukvy.ltd', 'FL2': 'fi.tribukvy.ltd'
+            'FL1': 'fi0.tribukvy.ltd', 'FL2': 'fi.tribukvy.ltd',
+            // Новые страны — замените домены на реальные, если необходимо
+            'US': 'us.tribukvy.ltd',
+            'CA': 'ca.tribukvy.ltd',
+            'GB': 'gb.tribukvy.ltd',
+            'FR': 'fr.tribukvy.ltd',
+            'SE': 'se.tribukvy.ltd',
+            'CH': 'ch.tribukvy.ltd',
+            'SG': 'sg.tribukvy.ltd'
         };
-        return `${serverMap[selectedServer] || 'de.tribukvy.ltd'}:${port}`;
+        // Если домена нет в map, используем de.tribukvy.ltd как fallback
+        const domain = serverMap[selectedServer] || 'de.tribukvy.ltd';
+        return `${domain}:${port}`;
     }
 
     const sessionCache = { keys: null, accountData: null, installId: null };
