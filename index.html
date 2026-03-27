@@ -430,9 +430,7 @@
             <label class="server-option"><div class="server-option-content">🇪🇪 Эстония</div><input type="radio" name="server" id="EE" class="server-radio"></label>
             <label class="server-option"><div class="server-option-content">🇵🇱 Польша</div><input type="radio" name="server" id="PL" class="server-radio"></label>
             <label class="server-option"><div class="server-option-content">🇩🇪 Германия</div><input type="radio" name="server" id="DE" class="server-radio"></label>
-            <label class="server-option"><div class="server-option-content">🇷🇺 Россия 1</div><input type="radio" name="server" id="RU" class="server-radio"></label>
-            <label class="server-option"><div class="server-option-content">🇷🇺 Россия 2</div><input type="radio" name="server" id="RU2" class="server-radio"></label>
-            <label class="server-option"><div class="server-option-content">🇱🇹 Литва</div><input type="radio" name="server" id="LT" class="server-radio"></label>
+            <label class="server-option"><div class="server-option-content">🇷🇺 Россия</div><input type="radio" name="server" id="RU" class="server-radio"></label>
         </div>
     </div>
 </div>
@@ -559,9 +557,7 @@
         EE: { flag: "🇪🇪", name: "ЭСТОНИЯ" },
         PL: { flag: "🇵🇱", name: "ПОЛЬША" },
         DE: { flag: "🇩🇪", name: "ГЕРМАНИЯ" },
-        RU: { flag: "🇷🇺", name: "РОССИЯ 1" },
-        RU2: { flag: "🇷🇺", name: "РОССИЯ 2" },
-        LT: { flag: "🇱🇹", name: "ЛИТВА" }
+        RU: { flag: "🇷🇺", name: "РОССИЯ" }
     };
 
     function getCurrentServerInfo() {
@@ -581,9 +577,9 @@
             return `${prefix}${randomNumber}:${port}`;
         }
         const serverMap = {
-            'PL': 'pl.tribukvy.ltd', 'DE': 'de.tribukvy.ltd', 'RU': 'ru0.tribukvy.ltd', 'RU2': 'ru.tribukvy.ltd',
+            'PL': 'pl.tribukvy.ltd', 'DE': 'de.tribukvy.ltd', 'RU': 'ru0.tribukvy.ltd',
             'EE': 'ee.tribukvy.ltd', 'NL1': 'nl0.tribukvy.ltd', 'NL2': 'nl.tribukvy.ltd',
-            'FL1': 'fi0.tribukvy.ltd', 'FL2': 'fi.tribukvy.ltd', 'LT': 'lt.tribukvy.ltd'
+            'FL1': 'fi0.tribukvy.ltd', 'FL2': 'fi.tribukvy.ltd'
         };
         return `${serverMap[selectedServer] || 'de.tribukvy.ltd'}:${port}`;
     }
